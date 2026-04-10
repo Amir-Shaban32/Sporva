@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -11,6 +5,221 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id            String           @id @default(cuid())
+  username      String           @unique
+  email         String           @unique
+  role          User_Role        @default(USER)
+  password      String
+  created_at    DateTime         @default(now())
+  updated_at    DateTime         @default(now())
+  refreshTokens Refresh_Tokens[]
+}
+
+model Refresh_Tokens {
+  id          String   @id @default(cuid())
+  user_id     String
+  token       String   @unique
+  expires_at  DateTime
+  created_at  DateTime @default(now())
+  last_used   DateTime
+  device_info Json
+  is_revoked  Boolean  @default(false)
+  user        User     @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@index([expires_at])
+  @@index([user_id, expires_at])
+}
+
+model Managers {
+  id              String              @id @default(cuid())
+  first_name      String?
+  last_name       String
+  birth_date      DateTime
+  nationality     String
+  is_retired      Boolean             @default(false)
+  retired_date    DateTime?
+  created_at      DateTime            @default(now())
+  updated_at      DateTime            @default(now())
+  managerContract Manager_Contracts[]
+  teams           Teams?
+}
+
+model Teams {
+  id                 String              @id @default(cuid())
+  name               String
+  founded_year       Int
+  city               String
+  stadium            String
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @default(now())
+  current_manager_id String              @unique
+  league             League_Standings[]
+  managerContract    Manager_Contracts[]
+  matchEvents        Match_Events[]
+  guestTeamMatch     Matches[]           @relation("GuestTeam")
+  hostTeamMatch      Matches[]           @relation("HostTeam")
+  playerContract     Player_Contracts[]
+  player             Players[]
+  manager            Managers            @relation(fields: [current_manager_id], references: [id])
+  outgoingTransfers  Transfers[]         @relation("FromTeam")
+  incomingTransfers  Transfers[]         @relation("ToTeam")
+}
+
+model Players {
+  id              String             @id @default(cuid())
+  first_name      String?
+  last_name       String
+  birth_date      DateTime
+  nationality     String
+  jersey_number   Int
+  position        Positions
+  preferred_foot  Foot_preference    @default(RIGHT)
+  joined_date     DateTime
+  team_id         String
+  is_retired      Boolean            @default(false)
+  retired_date    DateTime?
+  created_at      DateTime           @default(now())
+  updated_at      DateTime           @default(now())
+  matchEvents     Match_Events[]
+  playerContract  Player_Contracts[]
+  team            Teams              @relation(fields: [team_id], references: [id])
+  player_transfer Transfers[]
+}
+
+model Referees {
+  id           String           @id @default(cuid())
+  first_name   String?
+  last_name    String
+  birth_date   DateTime
+  nationality  String
+  is_retired   Boolean          @default(false)
+  retired_date DateTime?
+  created_at   DateTime         @default(now())
+  updated_at   DateTime         @default(now())
+  matchReferee Match_Referees[]
+}
+
+model Transfers {
+  id            String        @id @default(cuid())
+  player_id     String
+  from_team_id  String
+  to_team_id    String
+  transfer_date DateTime
+  transfer_fee  Decimal
+  transfer_type Transfer_type
+  created_at    DateTime      @default(now())
+  from_team     Teams         @relation("FromTeam", fields: [from_team_id], references: [id])
+  player        Players       @relation(fields: [player_id], references: [id])
+  to_team       Teams         @relation("ToTeam", fields: [to_team_id], references: [id])
+
+  @@index([player_id])
+  @@index([transfer_date])
+}
+
+model Matches {
+  id                  String           @id @default(cuid())
+  season              String
+  round               Int
+  stadium             String
+  host_team_id        String
+  guest_team_id       String
+  match_time          DateTime
+  competition         Competitions
+  status              Match_status
+  host_team_score     Int
+  guest_team_score    Int
+  got_extra_time      Boolean          @default(false)
+  got_penalties       Boolean          @default(false)
+  host_penalty_score  Int?
+  guest_penalty_score Int?
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @default(now())
+  matchEvents         Match_Events[]
+  matchReferee        Match_Referees[]
+  guest_team          Teams            @relation("GuestTeam", fields: [guest_team_id], references: [id])
+  host_team           Teams            @relation("HostTeam", fields: [host_team_id], references: [id])
+
+  @@index([match_time])
+  @@index([competition])
+  @@index([season])
+}
+
+model Match_Referees {
+  match_id      String
+  referee_id    String
+  role          Referee_role
+  match_referee Matches      @relation(fields: [match_id], references: [id])
+  referee       Referees     @relation(fields: [referee_id], references: [id])
+
+  @@id([match_id, referee_id, role])
+}
+
+model Match_Events {
+  id         String      @id @default(cuid())
+  match_id   String
+  player_id  String
+  team_id    String
+  event_type Event_types
+  minute     Int
+  created_at DateTime    @default(now())
+  match      Matches     @relation(fields: [match_id], references: [id])
+  player     Players     @relation(fields: [player_id], references: [id])
+  team       Teams       @relation(fields: [team_id], references: [id])
+
+  @@index([match_id])
+  @@index([player_id])
+  @@index([event_type])
+}
+
+model Player_Contracts {
+  id            String   @id @default(cuid())
+  player_id     String
+  team_id       String
+  start_date    DateTime
+  end_date      DateTime
+  annual_salary Decimal
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  player        Players  @relation(fields: [player_id], references: [id])
+  team          Teams    @relation(fields: [team_id], references: [id])
+
+  @@index([player_id])
+  @@index([player_id, is_active])
+}
+
+model Manager_Contracts {
+  id            String   @id @default(cuid())
+  manager_id    String
+  team_id       String
+  start_date    DateTime
+  end_date      DateTime
+  annual_salary Decimal
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  manager       Managers @relation(fields: [manager_id], references: [id])
+  team          Teams    @relation(fields: [team_id], references: [id])
+
+  @@index([manager_id])
+  @@index([manager_id, is_active])
+}
+
+model League_Standings {
+  team_id        String
+  season         String
+  matches_played Int    @default(0)
+  wins           Int    @default(0)
+  draws          Int    @default(0)
+  losses         Int    @default(0)
+  goals_for      Int    @default(0)
+  goals_against  Int    @default(0)
+  points         Int    @default(0)
+  team           Teams  @relation(fields: [team_id], references: [id])
+
+  @@id([season, team_id])
 }
 
 enum User_Role {
@@ -77,246 +286,4 @@ enum Foot_preference {
   LEFT
   RIGHT
   BOTH
-}
-
-model User {
-  id String @id @default(cuid())
-
-  username   String    @unique
-  email      String    @db.Text @unique
-  role       User_Role @default(USER)
-  password   String
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now())
-
-  refreshTokens Refresh_Tokens[]
-}
-
-model Refresh_Tokens {
-  id String @id @default(cuid())
-
-  user_id     String
-  token       String   @unique
-  expires_at  DateTime
-  created_at  DateTime @default(now())
-  last_used   DateTime
-  device_info Json     @db.JsonB //back here again
-  is_revoked  Boolean  @default(false)
-
-  user User @relation(fields: [user_id], references: [id])
-
-  @@index([user_id])
-  @@index([expires_at])
-  @@index([user_id, expires_at])
-}
-
-model Managers {
-  id String @id @default(cuid())
-
-  first_name   String?
-  last_name    String
-  birth_date   DateTime
-  nationality  String
-  is_retired   Boolean  @default(false)
-  retired_date DateTime
-  created_at   DateTime @default(now())
-  updated_at   DateTime @default(now())
-
-  teams           Teams?
-  managerContract Manager_Contracts[]
-}
-
-model Teams {
-  id String @id @default(cuid())
-
-  name         String
-  founded_year Int
-  city         String
-  stadium      String
-  created_at   DateTime @default(now())
-  updated_at   DateTime @default(now())
-
-  manager            Managers @relation(fields: [current_manager_id], references: [id])
-  current_manager_id String   @unique
-
-  player            Players[]
-  outgoingTransfers Transfers[]         @relation("FromTeam")
-  incomingTransfers Transfers[]         @relation("ToTeam")
-  hostTeamMatch     Matches[]           @relation("HostTeam")
-  guestTeamMatch    Matches[]           @relation("GuestTeam")
-  matchEvents       Match_Events[]
-  playerContract    Player_Contracts[]
-  managerContract   Manager_Contracts[]
-  league            League_Standings[]
-}
-
-model Players {
-  id String @id @default(cuid())
-
-  first_name     String?
-  last_name      String
-  birth_date     DateTime
-  nationality    String
-  jersey_number  Int
-  position       Positions
-  preferred_foot Foot_preference @default(RIGHT)
-  joined_date    DateTime
-  team_id        String          
-  is_retired     Boolean         @default(false)
-  retired_date   DateTime
-  created_at     DateTime        @default(now())
-  updated_at     DateTime        @default(now())
-
-  team Teams @relation(fields: [team_id], references: [id])
-
-  player_transfer Transfers[]
-  matchEvents     Match_Events[]
-  playerContract  Player_Contracts[]
-}
-
-model Referees {
-  id String @id @default(cuid())
-
-  first_name   String?
-  last_name    String
-  birth_date   DateTime
-  nationality  String
-  is_retired   Boolean  @default(false)
-  retired_date DateTime
-  created_at   DateTime @default(now())
-  updated_at   DateTime @default(now())
-
-  matchReferee Match_Referees[]
-}
-
-model Transfers {
-  id String @id @default(cuid())
-
-  player_id     String        
-  from_team_id  String
-  to_team_id    String
-  transfer_date DateTime
-  transfer_fee  Decimal
-  transfer_type Transfer_type
-  created_at    DateTime      @default(now())
-
-  player    Players @relation(fields: [player_id], references: [id])
-  from_team Teams   @relation("FromTeam", fields: [from_team_id], references: [id])
-  to_team   Teams   @relation("ToTeam", fields: [to_team_id], references: [id])
-
-  @@index([player_id])
-  @@index([transfer_date])
-}
-
-model Matches {
-  id String @id @default(cuid())
-
-  season              String
-  round               Int
-  stadium             String
-  host_team_id        String
-  guest_team_id       String
-  match_time          DateTime
-  competition         Competitions
-  status              Match_status
-  host_team_score     Int
-  guest_team_score    Int
-  got_extra_time      Boolean          @default(false)
-  got_penalties       Boolean          @default(false)
-  host_penalty_score  Int
-  guest_penalty_score Int
-  created_at          DateTime         @default(now())
-  updated_at          DateTime         @default(now())
-  matchReferee        Match_Referees[]
-  matchEvents         Match_Events[]
-
-  host_team  Teams @relation("HostTeam", fields: [host_team_id], references: [id])
-  guest_team Teams @relation("GuestTeam", fields: [guest_team_id], references: [id])
-
-  @@index([match_time])
-  @@index([competition])
-  @@index([season])
-}
-
-model Match_Referees {
-  match_id   String
-  referee_id String
-  role       Referee_role
-
-  match_referee Matches  @relation(fields: [match_id], references: [id])
-  referee       Referees @relation(fields: [referee_id], references: [id])
-
-  @@id([match_id, referee_id, role])
-}
-
-model Match_Events {
-  id String @id @default(cuid())
-
-  match_id   String
-  player_id  String
-  team       Teams       @relation(fields: [team_id], references: [id])
-  team_id    String
-  event_type Event_types
-  minute     Int
-  created_at DateTime    @default(now())
-
-  match  Matches @relation(fields: [match_id], references: [id])
-  player Players @relation(fields: [player_id], references: [id])
-
-  @@index([match_id])
-  @@index([player_id])
-  @@index([event_type])
-}
-
-model Player_Contracts {
-  id String @id @default(cuid())
-
-  player_id     String
-  team_id       String
-  start_date    DateTime
-  end_date      DateTime
-  annual_salary Decimal
-  is_active     Boolean  @default(true)
-  created_at    DateTime @default(now())
-
-  player Players @relation(fields: [player_id], references: [id])
-  team   Teams   @relation(fields: [team_id], references: [id])
-
-  @@index([player_id])
-  @@index([player_id, is_active])
-}
-
-model Manager_Contracts {
-  id String @id @default(cuid())
-
-  manager_id    String
-  team_id       String
-  start_date    DateTime
-  end_date      DateTime
-  annual_salary Decimal
-  is_active     Boolean  @default(true)
-  created_at    DateTime @default(now())
-
-  manager Managers @relation(fields: [manager_id], references: [id])
-  team    Teams    @relation(fields: [team_id], references: [id])
-
-  @@index([manager_id])
-  @@index([manager_id, is_active])
-}
-
-model League_Standings {
-  team_id String
-  season  String
-
-  matches_played Int @default(0)
-  wins           Int @default(0)
-  draws          Int @default(0)
-  losses         Int @default(0)
-  goals_for      Int @default(0)
-  goals_against  Int @default(0)
-  points         Int @default(0)
-
-  team Teams @relation(fields: [team_id], references: [id])
-
-  @@id([season, team_id])
 }
