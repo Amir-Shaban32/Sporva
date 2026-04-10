@@ -29,6 +29,7 @@ CREATE TYPE "Foot_preference" AS ENUM ('LEFT', 'RIGHT', 'BOTH');
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "username" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
     "role" "User_Role" NOT NULL DEFAULT 'USER',
     "password" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -88,11 +89,12 @@ CREATE TABLE "Players" (
     "birth_date" TIMESTAMP(3) NOT NULL,
     "nationality" TEXT NOT NULL,
     "jersey_number" INTEGER NOT NULL,
+    "position" "Positions" NOT NULL,
     "preferred_foot" "Foot_preference" NOT NULL DEFAULT 'RIGHT',
     "joined_date" TIMESTAMP(3) NOT NULL,
     "team_id" TEXT NOT NULL,
     "is_retired" BOOLEAN NOT NULL DEFAULT false,
-    "retired_date" TIMESTAMP(3) NOT NULL,
+    "retired_date" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -220,6 +222,9 @@ CREATE TABLE "League_Standings" (
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Refresh_Tokens_token_key" ON "Refresh_Tokens"("token");
 
 -- CreateIndex
@@ -280,19 +285,19 @@ ALTER TABLE "Teams" ADD CONSTRAINT "Teams_current_manager_id_fkey" FOREIGN KEY (
 ALTER TABLE "Players" ADD CONSTRAINT "Players_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transfers" ADD CONSTRAINT "Transfers_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "Players"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Transfers" ADD CONSTRAINT "Transfers_from_team_id_fkey" FOREIGN KEY ("from_team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transfers" ADD CONSTRAINT "Transfers_from_team_id_fkey" FOREIGN KEY ("from_team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Transfers" ADD CONSTRAINT "Transfers_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "Players"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Transfers" ADD CONSTRAINT "Transfers_to_team_id_fkey" FOREIGN KEY ("to_team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Matches" ADD CONSTRAINT "Matches_host_team_id_fkey" FOREIGN KEY ("host_team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Matches" ADD CONSTRAINT "Matches_guest_team_id_fkey" FOREIGN KEY ("guest_team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Matches" ADD CONSTRAINT "Matches_guest_team_id_fkey" FOREIGN KEY ("guest_team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Matches" ADD CONSTRAINT "Matches_host_team_id_fkey" FOREIGN KEY ("host_team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Match_Referees" ADD CONSTRAINT "Match_Referees_match_id_fkey" FOREIGN KEY ("match_id") REFERENCES "Matches"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -301,13 +306,13 @@ ALTER TABLE "Match_Referees" ADD CONSTRAINT "Match_Referees_match_id_fkey" FOREI
 ALTER TABLE "Match_Referees" ADD CONSTRAINT "Match_Referees_referee_id_fkey" FOREIGN KEY ("referee_id") REFERENCES "Referees"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Match_Events" ADD CONSTRAINT "Match_Events_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Match_Events" ADD CONSTRAINT "Match_Events_match_id_fkey" FOREIGN KEY ("match_id") REFERENCES "Matches"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Match_Events" ADD CONSTRAINT "Match_Events_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "Players"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Match_Events" ADD CONSTRAINT "Match_Events_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "Teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Player_Contracts" ADD CONSTRAINT "Player_Contracts_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "Players"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
