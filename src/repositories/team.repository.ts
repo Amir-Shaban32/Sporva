@@ -1,9 +1,9 @@
 import { prisma } from "../lib/prisma";
 import { Prisma } from "../../generated/prisma";
-import { Iteam } from "../types/team.type";
+import { ICreateTeam } from "../types";
 
 class TeamRepository {
-  async create(data: Iteam) {
+  async create(data: ICreateTeam) {
     return await prisma.teams.create({
       data: {
         name: data.name,
@@ -15,8 +15,14 @@ class TeamRepository {
     });
   }
 
+  async findById(id: string) {
+    return await prisma.teams.findUnique({
+      where: { id },
+    });
+  }
+
   async findByName(name: string) {
-    return await prisma.teams.findMany({
+    return await prisma.teams.findUnique({
       where: { name },
     });
   }

@@ -1,9 +1,9 @@
 import { prisma } from "../lib/prisma";
 import { Prisma, Positions } from "../../generated/prisma";
-import { Iplayer } from "../types/player.type";
+import { ICreatePlayer, PlayerSearchInput } from "../types";
 
 class PlayerRepository {
-  async create(data: Iplayer) {
+  async create(data: ICreatePlayer) {
     return await prisma.players.create({
       data: {
         first_name: data?.first_name,
@@ -21,7 +21,13 @@ class PlayerRepository {
     });
   }
 
-  async findByName(name: { f_name?: string; l_name?: string }) {
+  async findById(id: string) {
+    return await prisma.players.findUnique({
+      where: { id },
+    });
+  }
+
+  async findByName(name: PlayerSearchInput) {
     return await prisma.players.findMany({
       where: { first_name: name.f_name, last_name: name.l_name },
     });
@@ -42,6 +48,12 @@ class PlayerRepository {
   async findByNationality(nationality: string) {
     return await prisma.players.findMany({
       where: { nationality },
+    });
+  }
+
+  async findByJerseyAndTeam(jersey_number: number, team_id: string) {
+    return await prisma.players.findFirstOrThrow({
+      where: { jersey_number, team_id },
     });
   }
 
