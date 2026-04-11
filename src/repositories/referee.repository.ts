@@ -1,9 +1,9 @@
 import { prisma } from "../lib/prisma";
 import { Prisma } from "../../generated/prisma";
-import { Ireferee } from "../types/referee.type";
+import { ICreateReferee, RefereeSearchInput } from "../types";
 
 class RefereeRepository {
-  async create(data: Ireferee) {
+  async create(data: ICreateReferee) {
     return await prisma.referees.create({
       data: {
         first_name: data?.first_name,
@@ -16,7 +16,13 @@ class RefereeRepository {
     });
   }
 
-  async findByName(name: { f_name?: string; l_name?: string }) {
+  async findById(id: string) {
+    return await prisma.referees.findUnique({
+      where: { id },
+    });
+  }
+
+  async findByName(name: RefereeSearchInput) {
     return await prisma.referees.findMany({
       where: { first_name: name.f_name, last_name: name.l_name },
     });
@@ -25,6 +31,16 @@ class RefereeRepository {
   async findByNationality(nationality: string) {
     return await prisma.referees.findMany({
       where: { nationality },
+    });
+  }
+
+  async findByNameAndBirthDate(
+    first_name: string | null,
+    last_name: string,
+    birth_date: Date,
+  ) {
+    return await prisma.referees.findFirst({
+      where: { first_name, last_name, birth_date },
     });
   }
 

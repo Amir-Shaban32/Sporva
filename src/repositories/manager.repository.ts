@@ -1,9 +1,9 @@
 import { prisma } from "../lib/prisma";
 import { Prisma } from "../../generated/prisma";
-import { Imanager } from "../types/manager.type";
+import { ICreateManager, ManagerSearchInput } from "../types";
 
 export class ManagerRepository {
-  async create(data: Imanager) {
+  async create(data: ICreateManager) {
     return await prisma.managers.create({
       data: {
         first_name: data?.first_name,
@@ -16,9 +16,24 @@ export class ManagerRepository {
     });
   }
 
-  async findByName(name: { f_name?: string; l_name?: string }) {
+  async findByName(name: ManagerSearchInput) {
     return await prisma.managers.findMany({
       where: { first_name: name.f_name, last_name: name.l_name },
+    });
+  }
+
+  async findById(id: string) {
+    return await prisma.managers.findUnique({
+      where: { id },
+    });
+  }
+  async findByNameAndBirthDate(
+    first_name: string | null,
+    last_name: string,
+    birth_date: Date,
+  ) {
+    return await prisma.managers.findFirst({
+      where: { first_name, last_name, birth_date },
     });
   }
 
