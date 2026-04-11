@@ -1,8 +1,8 @@
 import { prisma } from "../lib/prisma";
-import { Imanager_contract } from "../types/manager_contract.type";
+import { ICreateManagerContract } from "../types";
 
 class ManagerContractRepository {
-  async create(data: Imanager_contract) {
+  async create(data: ICreateManagerContract) {
     return await prisma.manager_Contracts.create({
       data: {
         manager_id: data.manager_id,
@@ -10,7 +10,7 @@ class ManagerContractRepository {
         start_date: data.start_date,
         end_date: data.end_date,
         annual_salary: data.annual_salary,
-        is_active: data?.is_active,
+        is_active: data?.is_active ?? true,
       },
     });
   }

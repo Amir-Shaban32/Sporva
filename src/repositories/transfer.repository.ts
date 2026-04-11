@@ -1,8 +1,8 @@
 import { prisma } from "../lib/prisma";
-import { Itransfer } from "../types/transfer.type";
+import { ICreateTransfer } from "../types";
 
 class TransferRepository {
-  async create(data: Itransfer) {
+  async create(data: ICreateTransfer) {
     return await prisma.transfers.create({
       data: {
         player_id: data.player_id,

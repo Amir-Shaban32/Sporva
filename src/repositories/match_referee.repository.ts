@@ -1,8 +1,8 @@
 import { prisma } from "../lib/prisma";
-import { Imatch_referee } from "../types/match_referee.type";
+import { ICreateMatchReferee } from "../types";
 
 class MatchRefereeRepository {
-  async assign(data: Imatch_referee) {
+  async assign(data: ICreateMatchReferee) {
     return await prisma.match_Referees.create({
       data: {
         match_id: data.match_id,
@@ -24,7 +24,7 @@ class MatchRefereeRepository {
     });
   }
 
-  async unAssign(composite_id: Imatch_referee) {
+  async unAssign(composite_id: ICreateMatchReferee) {
     return await prisma.match_Referees.delete({
       where: {
         match_id_referee_id_role: {

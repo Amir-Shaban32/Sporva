@@ -1,9 +1,9 @@
 import { prisma } from "../lib/prisma";
 import { Event_types } from "../../generated/prisma";
-import { Ievent } from "../types/match_event.type";
+import { ICreateMatchEvent } from "../types";
 
 class MatchEventRepository {
-  async create(data: Ievent) {
+  async create(data: ICreateMatchEvent) {
     return await prisma.match_Events.create({
       data: {
         match_id: data.match_id,

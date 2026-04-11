@@ -1,15 +1,23 @@
 import { prisma } from "../lib/prisma";
 import { Prisma, User_Role } from "../../generated/prisma";
-import { IUser } from "../types/user.type";
+import { ICreateUser } from "../types";
 
 class UserRepository {
-  async create(data: IUser) {
+  async create(data: ICreateUser) {
     return await prisma.user.create({
       data: {
         username: data.username,
         email: data.email,
         password: data.password,
-        role: (data.role as User_Role) || User_Role.USER,
+        role: data.role || User_Role.USER,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
       },
     });
   }
@@ -17,18 +25,42 @@ class UserRepository {
   async findById(id: string) {
     return await prisma.user.findUnique({
       where: { id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
   }
 
   async findByUsername(username: string) {
     return await prisma.user.findUnique({
       where: { username },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
   }
 
   async findByEmail(email: string) {
     return await prisma.user.findUnique({
       where: { email },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
   }
 
@@ -38,9 +70,12 @@ class UserRepository {
       skip,
       take: limit,
       select: {
+        id: true,
         username: true,
+        email: true,
         role: true,
         created_at: true,
+        updated_at: true,
       },
     });
   }
@@ -49,12 +84,28 @@ class UserRepository {
     return await prisma.user.update({
       where: { id },
       data,
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
   }
 
   async delete(id: string) {
     return await prisma.user.delete({
       where: { id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
   }
 

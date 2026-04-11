@@ -1,9 +1,9 @@
 import { prisma } from "../lib/prisma";
 import { Competitions, Match_status, Prisma } from "../../generated/prisma";
-import { Imatch } from "../types/match.type";
+import { ICreateMatch } from "../types";
 
 class MatchRepository {
-  async schedule(data: Imatch) {
+  async schedule(data: ICreateMatch) {
     const year = new Date().getFullYear();
     const season_matching = `${year}-${year + 1}`;
     return await prisma.matches.create({
@@ -16,8 +16,8 @@ class MatchRepository {
         match_time: data.match_time,
         competition: data.competition,
         status: data.status,
-        host_team_score: data.host_team_score,
-        guest_team_score: data.guest_team_score,
+        host_team_score: data.host_team_score ?? 0,
+        guest_team_score: data.guest_team_score ?? 0,
         got_extra_time: data?.got_extra_time,
         got_penalties: data?.got_penalties,
         host_penalty_score: data?.host_penalty_score,

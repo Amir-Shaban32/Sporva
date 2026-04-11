@@ -1,8 +1,8 @@
 import { prisma } from "../lib/prisma";
-import { Iplayer_contract } from "../types/player_contract.type";
+import { ICreatePlayerContract } from "../types";
 
 class PlayerContractRepository {
-  async create(data: Iplayer_contract) {
+  async create(data: ICreatePlayerContract) {
     return await prisma.player_Contracts.create({
       data: {
         player_id: data.player_id,
@@ -10,7 +10,7 @@ class PlayerContractRepository {
         start_date: data.start_date,
         end_date: data.end_date,
         annual_salary: data.annual_salary,
-        is_active: data?.is_active,
+        is_active: data?.is_active ?? true,
       },
     });
   }
