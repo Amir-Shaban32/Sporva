@@ -50,7 +50,7 @@ model Managers {
 
 model Teams {
   id                 String              @id @default(cuid())
-  name               String
+  name               String              @unique
   founded_year       Int
   city               String
   stadium            String
