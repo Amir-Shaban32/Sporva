@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   createUserService,
   getUserByIdService,
@@ -9,15 +9,10 @@ import {
   updateUserService,
   deleteUserService,
   countUsersService,
-} from "../services/users.service";
+} from "../services";
 
 export const createUser = async (req: Request, res: Response) => {
   const data = req.body;
-  if (!data.username || !data.email || !data.password) {
-    return res
-      .status(400)
-      .json({ message: "Username, email, and password are required!" });
-  }
 
   const result = await createUserService(data);
 
@@ -31,7 +26,7 @@ export const createUser = async (req: Request, res: Response) => {
 };
 
 export const getUserById = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) {
     return res.status(400).json({ message: "Bad request!" });
   }
@@ -97,7 +92,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   const data = req.body;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 
@@ -113,7 +108,7 @@ export const updateUser = async (req: Request, res: Response) => {
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) {
     return res.status(400).json({ message: "Bad request!" });
   }

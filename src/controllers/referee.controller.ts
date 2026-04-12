@@ -1,22 +1,18 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   createRefereeService,
   getRefereeByIdService,
   getRefereeByNameService,
+  getRefereesByMatchService,
   getRefereeByNationalityService,
   updateRefereeService,
   countRefereeService,
   deleteRefereeService,
-} from "../services/referee.service";
+} from "../services";
 
 export const createReferee = async (req: Request, res: Response) => {
   const data = req.body;
-  if (!data.last_name || !data.birth_date || !data.nationality) {
-    return res.status(400).json({
-      message: "last_name, birth_date, and nationality are required!",
-    });
-  }
 
   const result = await createRefereeService(data);
 
@@ -46,7 +42,7 @@ export const getRefereeById = async (req: Request, res: Response) => {
   return res.status(200).json({ referee: result.data });
 };
 
-export const findRefereeByName = async (req: Request, res: Response) => {
+export const getRefereeByName = async (req: Request, res: Response) => {
   const { f_name, l_name } = req.query;
   if (!f_name && !l_name) {
     return res.status(400).json({ message: "Bad request!" });
@@ -66,7 +62,7 @@ export const findRefereeByName = async (req: Request, res: Response) => {
   return res.status(200).json({ referees: result.data });
 };
 
-export const findRefereeByNationality = async (req: Request, res: Response) => {
+export const getRefereeByNationality = async (req: Request, res: Response) => {
   const { nationality } = req.query;
   if (!nationality) {
     return res.status(400).json({ message: "Bad request!" });
@@ -83,8 +79,25 @@ export const findRefereeByNationality = async (req: Request, res: Response) => {
   return res.status(200).json({ referees: result.data });
 };
 
+export const getRefereesByMatch = async (req: Request, res: Response) => {
+  const { match_id } = req.params;
+  if (!match_id) {
+    return res.status(400).json({ message: "Bad request!" });
+  }
+
+  const result = await getRefereesByMatchService(match_id as string);
+
+  if (!result.success) {
+    return res
+      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
+      .json({ message: result.error });
+  }
+
+  return res.status(200).json({ referees: result.data });
+};
+
 export const updateReferee = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   const data = req.body;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 
@@ -100,7 +113,7 @@ export const updateReferee = async (req: Request, res: Response) => {
 };
 
 export const deleteReferee = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 
   const result = await deleteRefereeService(id as string);

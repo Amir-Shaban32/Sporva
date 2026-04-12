@@ -1,24 +1,13 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   createTransferService,
   getTransfersByPlayerService,
   getTransfersByTeamService,
-} from "../services/transfer.service";
+} from "../services";
 
 export const createTransfer = async (req: Request, res: Response) => {
   const data = req.body;
-  if (
-    !data.player_id ||
-    !data.from_team_id ||
-    !data.to_team_id ||
-    !data.season ||
-    !data.transfer_date
-  ) {
-    return res.status(400).json({
-      message: "Missing required fields for transfer!",
-    });
-  }
 
   const result = await createTransferService(data);
 
@@ -32,7 +21,7 @@ export const createTransfer = async (req: Request, res: Response) => {
 };
 
 export const getTransfersByPlayer = async (req: Request, res: Response) => {
-  const { player_id } = req.query;
+  const { player_id } = req.params;
   if (!player_id) {
     return res.status(400).json({ message: "Bad request!" });
   }
@@ -49,7 +38,7 @@ export const getTransfersByPlayer = async (req: Request, res: Response) => {
 };
 
 export const getTransfersByTeam = async (req: Request, res: Response) => {
-  const { team_id } = req.query;
+  const { team_id } = req.params;
   if (!team_id) {
     return res.status(400).json({ message: "Bad request!" });
   }

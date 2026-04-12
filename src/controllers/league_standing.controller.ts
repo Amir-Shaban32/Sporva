@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   getLeagueTableService,
   getLeagueTableByMostWinsService,
@@ -8,7 +8,7 @@ import {
   getLeagueTableByMostGoalsForService,
   getLeagueTableByLeastGoalsAgainstService,
   getLeagueTableByGoalsDifferenceService,
-} from "../services/league_standing.service";
+} from "../services";
 
 export const getLeagueTable = async (req: Request, res: Response) => {
   const result = await getLeagueTableService();

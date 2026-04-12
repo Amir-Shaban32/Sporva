@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   scheduleMatchService,
   getMatchByTeamService,
@@ -12,24 +12,11 @@ import {
   getMatchesByRoundService,
   getMatchesWithExtraTimeService,
   getMatchesWithPenaltiesService,
-} from "../services/match.service";
+} from "../services";
 import { Match_status, Competitions } from "../../generated/prisma";
 
 export const scheduleMatch = async (req: Request, res: Response) => {
   const data = req.body;
-  if (
-    !data.round ||
-    !data.stadium ||
-    !data.host_team_id ||
-    !data.guest_team_id ||
-    !data.match_time ||
-    !data.competition ||
-    !data.status
-  ) {
-    return res.status(400).json({
-      message: "Missing required fields for scheduling match!",
-    });
-  }
 
   const result = await scheduleMatchService(data);
 
@@ -43,7 +30,7 @@ export const scheduleMatch = async (req: Request, res: Response) => {
 };
 
 export const getMatchByTeam = async (req: Request, res: Response) => {
-  const { team_id } = req.query;
+  const { team_id } = req.params;
   if (!team_id) {
     return res.status(400).json({ message: "Bad request!" });
   }
@@ -186,7 +173,7 @@ export const getMatchesWithPenalties = async (req: Request, res: Response) => {
 };
 
 export const updateMatch = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   const data = req.body;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 

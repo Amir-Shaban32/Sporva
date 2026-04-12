@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   getPlayerByNameService,
   getPlayerByTeamService,
@@ -8,10 +8,25 @@ import {
   updatePlayerService,
   deletePlayerService,
   countPlayerService,
-} from "../services/player.service";
+  createPlayerService,
+} from "../services";
 import { Positions } from "../../generated/prisma";
 
-export const findPlayerByName = async (req: Request, res: Response) => {
+export const createPlayer = async (req: Request, res: Response) => {
+  const data = req.body;
+
+  const result = await createPlayerService(data);
+
+  if (!result.success) {
+    return res
+      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
+      .json({ message: result.error });
+  }
+
+  return res.status(201).json({ team: result.data });
+};
+
+export const getPlayerByName = async (req: Request, res: Response) => {
   const { f_name, l_name } = req.query;
   if (!f_name && !l_name) {
     return res.status(400).json({ message: "Bad request!" });
@@ -31,8 +46,8 @@ export const findPlayerByName = async (req: Request, res: Response) => {
   return res.status(200).json({ players: result.data });
 };
 
-export const findPlayerByTeam = async (req: Request, res: Response) => {
-  const { team_id } = req.query;
+export const getPlayerByTeam = async (req: Request, res: Response) => {
+  const { team_id } = req.params;
   if (!team_id) {
     return res.status(400).json({ message: "Bad request!" });
   }
@@ -48,7 +63,7 @@ export const findPlayerByTeam = async (req: Request, res: Response) => {
   return res.status(200).json({ players: result.data });
 };
 
-export const findPlayerByPosition = async (req: Request, res: Response) => {
+export const getPlayerByPosition = async (req: Request, res: Response) => {
   const { position } = req.query;
   if (!position) {
     return res.status(400).json({ message: "Bad request!" });
@@ -65,7 +80,7 @@ export const findPlayerByPosition = async (req: Request, res: Response) => {
   return res.status(200).json({ players: result.data });
 };
 
-export const findPlayerByNationality = async (req: Request, res: Response) => {
+export const getPlayerByNationality = async (req: Request, res: Response) => {
   const { nationality } = req.query;
   if (!nationality) {
     return res.status(400).json({ message: "Bad request!" });
@@ -83,7 +98,7 @@ export const findPlayerByNationality = async (req: Request, res: Response) => {
 };
 
 export const updatePlayer = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   const data = req.body;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 
@@ -99,7 +114,7 @@ export const updatePlayer = async (req: Request, res: Response) => {
 };
 
 export const deletePlayer = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 
   const result = await deletePlayerService(id as string);

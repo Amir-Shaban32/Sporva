@@ -1,26 +1,16 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   createMatchEventService,
   getMatchEventsByMatchService,
   getMatchEventsByTypeService,
   getMatchEventsByPlayerService,
   deleteMatchEventService,
-} from "../services/match_event.service";
+} from "../services";
 import { Event_types } from "../../generated/prisma";
 
 export const createMatchEvent = async (req: Request, res: Response) => {
   const data = req.body;
-  if (
-    !data.match_id ||
-    !data.player_id ||
-    !data.event_type ||
-    !data.event_minute
-  ) {
-    return res.status(400).json({
-      message: "Missing required fields for match event!",
-    });
-  }
 
   const result = await createMatchEventService(data);
 
@@ -34,7 +24,7 @@ export const createMatchEvent = async (req: Request, res: Response) => {
 };
 
 export const getMatchEventsByMatch = async (req: Request, res: Response) => {
-  const { match_id } = req.query;
+  const { match_id } = req.params;
   if (!match_id) {
     return res.status(400).json({ message: "Bad request!" });
   }
@@ -68,7 +58,7 @@ export const getMatchEventsByType = async (req: Request, res: Response) => {
 };
 
 export const getMatchEventsByPlayer = async (req: Request, res: Response) => {
-  const { player_id } = req.query;
+  const { player_id } = req.params;
   if (!player_id) {
     return res.status(400).json({ message: "Bad request!" });
   }
@@ -85,7 +75,7 @@ export const getMatchEventsByPlayer = async (req: Request, res: Response) => {
 };
 
 export const deleteMatchEvent = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) {
     return res.status(400).json({ message: "Bad request!" });
   }

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   createTeamService,
   getTeamByIdService,
@@ -8,22 +8,10 @@ import {
   updateTeamService,
   countTeamService,
   deleteTeamService,
-} from "../services/team.service";
+} from "../services";
 
 export const createTeam = async (req: Request, res: Response) => {
   const data = req.body;
-  if (
-    !data.name ||
-    !data.founded_year ||
-    !data.city ||
-    !data.stadium ||
-    !data.current_manager_id
-  ) {
-    return res.status(400).json({
-      message:
-        "name, founded_year, city, stadium, and current_manager_id are required!",
-    });
-  }
 
   const result = await createTeamService(data);
 
@@ -37,7 +25,7 @@ export const createTeam = async (req: Request, res: Response) => {
 };
 
 export const getTeamById = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) {
     return res.status(400).json({ message: "Bad request!" });
   }
@@ -88,7 +76,7 @@ export const getTeamByCity = async (req: Request, res: Response) => {
 };
 
 export const updateTeam = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   const data = req.body;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 
@@ -104,7 +92,7 @@ export const updateTeam = async (req: Request, res: Response) => {
 };
 
 export const deleteTeam = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 
   const result = await deleteTeamService(id as string);

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   createManagerContractService,
   getActiveManagerContractsService,
@@ -7,21 +7,10 @@ import {
   getManagerContractsByManagerService,
   deActivateManagerContractService,
   getManagerContractsByIntervalService,
-} from "../services/manager_contract.service";
+} from "../services";
 
 export const createManagerContract = async (req: Request, res: Response) => {
   const data = req.body;
-  if (
-    !data.manager_id ||
-    !data.team_id ||
-    !data.start_date ||
-    !data.end_date ||
-    !data.salary
-  ) {
-    return res.status(400).json({
-      message: "Missing required fields for contract!",
-    });
-  }
 
   const result = await createManagerContractService(data);
 
@@ -68,7 +57,7 @@ export const getManagerContractsByManager = async (
   req: Request,
   res: Response,
 ) => {
-  const { manager_id } = req.query;
+  const { manager_id } = req.params;
   if (!manager_id) {
     return res.status(400).json({ message: "Bad request!" });
   }
@@ -90,7 +79,7 @@ export const deActivateManagerContract = async (
   req: Request,
   res: Response,
 ) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) {
     return res.status(400).json({ message: "Bad request!" });
   }

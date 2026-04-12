@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   createPlayerContractService,
   getActivePlayerContractsService,
@@ -7,21 +7,10 @@ import {
   getPlayerContractsByPlayerService,
   deActivatePlayerContractService,
   getPlayerContractsByIntervalService,
-} from "../services/player_contract.service";
+} from "../services";
 
 export const createPlayerContract = async (req: Request, res: Response) => {
   const data = req.body;
-  if (
-    !data.player_id ||
-    !data.team_id ||
-    !data.start_date ||
-    !data.end_date ||
-    !data.salary
-  ) {
-    return res.status(400).json({
-      message: "Missing required fields for contract!",
-    });
-  }
 
   const result = await createPlayerContractService(data);
 
@@ -65,7 +54,7 @@ export const getPlayerContractsByPlayer = async (
   req: Request,
   res: Response,
 ) => {
-  const { player_id } = req.query;
+  const { player_id } = req.params;
   if (!player_id) {
     return res.status(400).json({ message: "Bad request!" });
   }
@@ -82,7 +71,7 @@ export const getPlayerContractsByPlayer = async (
 };
 
 export const deActivatePlayerContract = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) {
     return res.status(400).json({ message: "Bad request!" });
   }

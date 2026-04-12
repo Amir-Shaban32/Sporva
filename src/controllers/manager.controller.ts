@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config/http-status.config";
+import { SERVICE_ERROR_STATUS } from "../config";
 import {
   createManagerService,
   getManagerByNameService,
@@ -7,15 +7,10 @@ import {
   updateManagerService,
   countManagerService,
   deleteManagerService,
-} from "../services/manager.service";
+} from "../services";
 
 export const createManager = async (req: Request, res: Response) => {
   const data = req.body;
-  if (!data.last_name || !data.birth_date || !data.nationality) {
-    return res.status(400).json({
-      message: "last_name, birth_date, and nationality are required!",
-    });
-  }
 
   const result = await createManagerService(data);
 
@@ -28,7 +23,7 @@ export const createManager = async (req: Request, res: Response) => {
   return res.status(201).json({ manager: result.data });
 };
 
-export const findManagerByName = async (req: Request, res: Response) => {
+export const getManagerByName = async (req: Request, res: Response) => {
   const { f_name, l_name } = req.query;
   if (!f_name && !l_name) {
     return res.status(400).json({ message: "Bad request!" });
@@ -48,7 +43,7 @@ export const findManagerByName = async (req: Request, res: Response) => {
   return res.status(200).json({ managers: result.data });
 };
 
-export const findManagerByNationality = async (req: Request, res: Response) => {
+export const getManagerByNationality = async (req: Request, res: Response) => {
   const { nationality } = req.query;
   if (!nationality) {
     return res.status(400).json({ message: "Bad request!" });
@@ -66,7 +61,7 @@ export const findManagerByNationality = async (req: Request, res: Response) => {
 };
 
 export const updateManager = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   const data = req.body;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 
@@ -82,7 +77,7 @@ export const updateManager = async (req: Request, res: Response) => {
 };
 
 export const deleteManager = async (req: Request, res: Response) => {
-  const { id } = req.query;
+  const { id } = req.params;
   if (!id) return res.status(400).json({ message: "Bad request!" });
 
   const result = await deleteManagerService(id as string);
