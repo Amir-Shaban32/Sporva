@@ -1,4 +1,4 @@
-import { transferREpository } from "../repositories/transfer.repository";
+import { transferREpository } from "../repositories";
 import { ServiceResult, ITransfer, ICreateTransfer } from "../types";
 
 export const createTransferService = async (

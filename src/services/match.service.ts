@@ -1,4 +1,4 @@
-import { matchRepository } from "../repositories/match.repository";
+import { matchRepository } from "../repositories";
 import { ServiceResult, IMatch, ICreateMatch } from "../types";
 import { Prisma, Match_status, Competitions } from "../../generated/prisma";
 

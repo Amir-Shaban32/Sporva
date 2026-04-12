@@ -1,4 +1,4 @@
-import { userRepository } from "../repositories/user.repository";
+import { userRepository } from "../repositories";
 import { ServiceResult, IUser, ICreateUser } from "../types";
 import { Prisma } from "../../generated/prisma";
 

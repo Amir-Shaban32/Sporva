@@ -4,7 +4,7 @@ import {
   ICreateReferee,
   RefereeSearchInput,
 } from "../types";
-import { refereeRepository } from "../repositories/referee.repository";
+import { refereeRepository } from "../repositories";
 import { Prisma } from "../../generated/prisma";
 
 export const createRefereeService = async (

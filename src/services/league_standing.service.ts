@@ -1,4 +1,4 @@
-import { leagueStandingsRepository } from "../repositories/league_standings.repository";
+import { leagueStandingsRepository } from "../repositories";
 import { ServiceResult, ILeagueStanding } from "../types";
 
 export const getLeagueTableService = async (

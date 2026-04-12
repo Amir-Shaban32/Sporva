@@ -1,4 +1,4 @@
-import { managerRepository } from "../repositories/manager.repository";
+import { managerRepository } from "../repositories";
 import {
   ManagerSearchInput,
   ServiceResult,

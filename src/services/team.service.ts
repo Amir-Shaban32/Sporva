@@ -1,4 +1,4 @@
-import { teamRepository } from "../repositories/team.repository";
+import { teamRepository } from "../repositories";
 import { Prisma } from "../../generated/prisma";
 import { ServiceResult, ITeam, ICreateTeam } from "../types";
 

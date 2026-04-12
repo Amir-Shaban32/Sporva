@@ -1,4 +1,4 @@
-import { playerContractRepository } from "../repositories/player_contract.repository";
+import { playerContractRepository } from "../repositories";
 import {
   ServiceResult,
   IPlayerContract,

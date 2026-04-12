@@ -1,5 +1,5 @@
 import { Positions } from "../../generated/prisma";
-import { playerRepository } from "../repositories/player.repository";
+import { playerRepository } from "../repositories";
 import {
   PlayerSearchInput,
   ServiceResult,

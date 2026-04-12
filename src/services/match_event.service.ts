@@ -1,4 +1,4 @@
-import { matchEventRepository } from "../repositories/match_events.repository";
+import { matchEventRepository } from "../repositories";
 import { ServiceResult, IMatchEvent, ICreateMatchEvent } from "../types";
 import { Event_types } from "../../generated/prisma";
 

@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma";
-import { managerContractRepository } from "../repositories/manager_contract.repository";
+import { managerContractRepository } from "../repositories";
 import {
   ServiceResult,
   IManagerContract,

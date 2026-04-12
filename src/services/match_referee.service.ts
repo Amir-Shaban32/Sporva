@@ -1,4 +1,4 @@
-import { matchRefereeRepository } from "../repositories/match_referee.repository";
+import { matchRefereeRepository } from "../repositories";
 import { ServiceResult, ICreateMatchReferee, IMatchReferee } from "../types";
 
 export const assignRefereeToMatchService = async (
