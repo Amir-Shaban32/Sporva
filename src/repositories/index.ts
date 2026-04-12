@@ -1,0 +1,12 @@
+export { userRepository } from "./user.repository";
+export { managerRepository } from "./manager.repository";
+export { refereeRepository } from "./referee.repository";
+export { teamRepository } from "./team.repository";
+export { playerRepository } from "./player.repository";
+export { matchRepository } from "./match.repository";
+export { transferREpository } from "./transfer.repository";
+export { playerContractRepository } from "./player_contract.repository";
+export { managerContractRepository } from "./manager_contract.repository";
+export { matchEventRepository } from "./match_events.repository";
+export { matchRefereeRepository } from "./match_referee.repository";
+export { leagueStandingsRepository } from "./league_standings.repository";
