@@ -10,3 +10,4 @@ export { managerContractRepository } from "./manager_contract.repository";
 export { matchEventRepository } from "./match_events.repository";
 export { matchRefereeRepository } from "./match_referee.repository";
 export { leagueStandingsRepository } from "./league_standings.repository";
+export { refreshTokenRepository } from "./auth/refreshToken.repository";
