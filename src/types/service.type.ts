@@ -3,5 +3,10 @@ export type ServiceResult<T> =
   | {
       success: false;
       error: string;
-      code?: "NOT_FOUND" | "DB_ERROR" | "INVALID_ID" | "CONFLICT";
+      code?:
+        | "NOT_FOUND"
+        | "DB_ERROR"
+        | "INVALID_ID"
+        | "CONFLICT"
+        | "UNAUTHORIZED";
     };
