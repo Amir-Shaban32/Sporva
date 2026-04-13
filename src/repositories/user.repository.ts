@@ -50,6 +50,21 @@ class UserRepository {
     });
   }
 
+  async findByUsernameWithPassword(username: string) {
+    return await prisma.user.findUnique({
+      where: { username },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        password: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+  }
+
   async findByEmail(email: string) {
     return await prisma.user.findUnique({
       where: { email },
