@@ -17,6 +17,7 @@ import {
   getMatchesWithPenalties,
   updateMatch,
 } from "../controllers";
+import { sensitiveWriteLimiter } from "../middleware/rate_limit.middleware";
 
 const router: Router = Router();
 
@@ -29,7 +30,17 @@ router.get("/season", getMatchesBySeasonEndpoint);
 router.get("/round", getMatchesByRound);
 router.get("/extra", getMatchesWithExtraTime);
 router.get("/penalties", getMatchesWithPenalties);
-router.post("/", validate(createMatchValidation), scheduleMatch);
-router.patch("/:id", validate(updateMatchValidation), updateMatch);
+router.post(
+  "/",
+  sensitiveWriteLimiter,
+  validate(createMatchValidation),
+  scheduleMatch,
+);
+router.patch(
+  "/:id",
+  sensitiveWriteLimiter,
+  validate(updateMatchValidation),
+  updateMatch,
+);
 
 export default router;

@@ -14,6 +14,7 @@ import {
   deletePlayer,
   countPlayers,
 } from "../controllers";
+import { sensitiveWriteLimiter } from "../middleware/rate_limit.middleware";
 
 const router: Router = Router();
 
@@ -22,8 +23,18 @@ router.get("/nationality", getPlayerByNationality);
 router.get("position", getPlayerByPosition);
 router.get("/:teamId", getPlayerByTeam);
 router.get("/count", countPlayers);
-router.post("/", validate(createPlayerValidation), createPlayer);
-router.patch("/:id", validate(updatePlayerValidation), updatePlayer);
-router.delete("/:id", deletePlayer);
+router.post(
+  "/",
+  sensitiveWriteLimiter,
+  validate(createPlayerValidation),
+  createPlayer,
+);
+router.patch(
+  "/:id",
+  sensitiveWriteLimiter,
+  validate(updatePlayerValidation),
+  updatePlayer,
+);
+router.delete("/:id", sensitiveWriteLimiter, deletePlayer);
 
 export default router;

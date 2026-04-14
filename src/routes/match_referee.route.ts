@@ -9,17 +9,20 @@ import {
   getMatchByReferee,
   unAssignRefereeFromMatch,
 } from "../controllers";
+import { sensitiveWriteLimiter } from "../middleware/rate_limit.middleware";
 
 const router: Router = Router();
 
 router.get("/:refereeId", getMatchByReferee);
 router.post(
   "/assign",
+  sensitiveWriteLimiter,
   validate(createMatchRefereeValidation),
   assignRefereeToMatch,
 );
 router.delete(
   "/unassign",
+  sensitiveWriteLimiter,
   validate(updateMatchRefereeValidation),
   unAssignRefereeFromMatch,
 );

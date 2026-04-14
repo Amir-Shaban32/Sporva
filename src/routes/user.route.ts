@@ -14,6 +14,7 @@ import {
   deleteUser,
   countUsers,
 } from "../controllers";
+import { sensitiveWriteLimiter } from "../middleware/rate_limit.middleware";
 
 const router: Router = Router();
 
@@ -21,9 +22,19 @@ router.get("/", getAllUsers);
 router.get("/:id", getUserById);
 router.get("/username", getUserByUsername);
 router.get("/email", getUserByEmail);
-router.post("/", validate(createUserValidation), createUser);
-router.patch("/:id", validate(updateUserValidation), updateUser);
-router.delete("/:id", deleteUser);
+router.post(
+  "/",
+  sensitiveWriteLimiter,
+  validate(createUserValidation),
+  createUser,
+);
+router.patch(
+  "/:id",
+  sensitiveWriteLimiter,
+  validate(updateUserValidation),
+  updateUser,
+);
+router.delete("/:id", sensitiveWriteLimiter, deleteUser);
 router.get("/count", countUsers);
 
 export default router;

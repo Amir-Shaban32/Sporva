@@ -12,14 +12,25 @@ import {
   deleteManager,
   countManagers,
 } from "../controllers";
+import { sensitiveWriteLimiter } from "../middleware/rate_limit.middleware";
 
 const router: Router = Router();
 
 router.get("/name", getManagerByName);
 router.get("/nationality", getManagerByNationality);
 router.get("/count", countManagers);
-router.post("/", validate(createManagerValidation), createManager);
-router.patch("/:id", validate(updateManagerValidation), updateManager);
-router.delete("/:id", deleteManager);
+router.post(
+  "/",
+  sensitiveWriteLimiter,
+  validate(createManagerValidation),
+  createManager,
+);
+router.patch(
+  "/:id",
+  sensitiveWriteLimiter,
+  validate(updateManagerValidation),
+  updateManager,
+);
+router.delete("/:id", sensitiveWriteLimiter, deleteManager);
 
 export default router;

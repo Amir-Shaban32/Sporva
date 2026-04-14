@@ -14,6 +14,7 @@ import {
   deleteReferee,
   countReferees,
 } from "../controllers";
+import { sensitiveWriteLimiter } from "../middleware/rate_limit.middleware";
 
 const router: Router = Router();
 
@@ -22,8 +23,18 @@ router.get("/name", getRefereeByName);
 router.get("/nationality", getRefereeByNationality);
 router.get("/:matchId", getRefereesByMatch);
 router.get("/count", countReferees);
-router.post("/", validate(createRefereeValidation), createReferee);
-router.patch("/:id", validate(updateRefereeValidation), updateReferee);
-router.delete("/:id", deleteReferee);
+router.post(
+  "/",
+  sensitiveWriteLimiter,
+  validate(createRefereeValidation),
+  createReferee,
+);
+router.patch(
+  "/:id",
+  sensitiveWriteLimiter,
+  validate(updateRefereeValidation),
+  updateReferee,
+);
+router.delete("/:id", sensitiveWriteLimiter, deleteReferee);
 
 export default router;

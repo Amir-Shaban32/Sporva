@@ -12,6 +12,7 @@ import {
   getManagerContractsByInterval,
   deActivateManagerContract,
 } from "../controllers";
+import { sensitiveWriteLimiter } from "../middleware/rate_limit.middleware";
 
 const router: Router = Router();
 
@@ -21,11 +22,13 @@ router.get("/:managerId", getManagerContractsByManager);
 router.get("/interval", getManagerContractsByInterval);
 router.post(
   "/",
+  sensitiveWriteLimiter,
   validate(createManagerContractValidation),
   createManagerContract,
 );
 router.patch(
   "/:id",
+  sensitiveWriteLimiter,
   validate(updateManagerContractValidation),
   deActivateManagerContract,
 );
