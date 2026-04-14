@@ -4,4 +4,5 @@ export const SERVICE_ERROR_STATUS: Record<string, number> = {
   DB_ERROR: 500,
   CONFLICT: 409,
   UNAUTHORIZED: 401,
+  NO_CONTENT: 204,
 };
