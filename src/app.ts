@@ -11,23 +11,25 @@ import matchEventRouter from "./routes/match_event.route";
 import managerRouter from "./routes/manager.route";
 import managerContractRouter from "./routes/manager_contract.route";
 import leagueStandingsRouter from "./routes/league_standing.route";
+import authRouter from "./routes/auth/auth.route";
 
 const app: Application = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use("/users", userRouter);
-app.use("/transfers", transferRouter);
-app.use("/teams", teamRouter);
-app.use("/referees", refereeRouter);
-app.use("/players", playerRouter);
-app.use("/playersContracts", playerContractRouter);
-app.use("/matches", matchRouter);
-app.use("/matchReferees", matchRefereeRouter);
-app.use("/matchEvents", matchEventRouter);
-app.use("/managers", managerRouter);
-app.use("/managerContracts", managerContractRouter);
-app.use("/league", leagueStandingsRouter);
+app.use("/api/users", userRouter);
+app.use("/api/transfers", transferRouter);
+app.use("/api/teams", teamRouter);
+app.use("/api/referees", refereeRouter);
+app.use("/api/players", playerRouter);
+app.use("/api/playersContracts", playerContractRouter);
+app.use("/api/matches", matchRouter);
+app.use("/api/matchReferees", matchRefereeRouter);
+app.use("/api/matchEvents", matchEventRouter);
+app.use("/api/managers", managerRouter);
+app.use("/api/managerContracts", managerContractRouter);
+app.use("/api/league", leagueStandingsRouter);
+app.use("/auth", authRouter);
 
 export default app;
