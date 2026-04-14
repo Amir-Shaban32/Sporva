@@ -8,5 +8,7 @@ export type ServiceResult<T> =
         | "DB_ERROR"
         | "INVALID_ID"
         | "CONFLICT"
-        | "UNAUTHORIZED";
+        | "UNAUTHORIZED"
+        | "FORBIDDEN"
+        | "NO_CONTENT";
     };
