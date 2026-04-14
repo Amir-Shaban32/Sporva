@@ -45,7 +45,7 @@ export const loginService = async (
       token: refreshToken,
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
       last_used: new Date(),
-      device_info: {},
+      device_info: JSON.parse(JSON.stringify(deviceInfo)),
     });
 
     if (!newToken.success) {
