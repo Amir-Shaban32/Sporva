@@ -9,24 +9,14 @@ const passwordValidation = z
   .regex(/\d/, "Must contain a number")
   .regex(/[@$!%*?&]/, "Must contain a special character (@$!%*?&)");
 
-const baseUserSchema = z.object({
+export const createUserValidation = z.object({
   username: z.string().min(2),
   email: z.email(),
   password: passwordValidation,
-  confirmPassword: z.string(),
   role: z.enum([User_Role.ADMIN, User_Role.USER]).optional(),
 });
 
-export const createUserValidation = baseUserSchema.refine(
-  (data) => data.password === data.confirmPassword,
-  {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  },
-);
-
-export const updateUserValidation = baseUserSchema
-  .omit({ confirmPassword: true })
+export const updateUserValidation = createUserValidation
   .partial()
   .refine((data) => Object.values(data).some((v) => v !== undefined), {
     message: "At least one field must be provided",
