@@ -11,3 +11,7 @@ export * from "./match_event.service";
 export * from "./match_referee.service";
 export * from "./league_standing.service";
 export * from "./auth/refreshToken.service";
+export * from "./auth/register.service";
+export * from "./auth/login.service";
+export * from "./auth/logout.service";
+export * from "./auth/refresh.service";
