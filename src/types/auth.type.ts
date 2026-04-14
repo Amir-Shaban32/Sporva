@@ -18,3 +18,24 @@ export interface LoginResult {
   accessToken: string;
   refreshToken: string;
 }
+
+export interface LogoutInput {
+  cookieToken?: string;
+}
+
+export interface RefreshTokenResult {
+  accessToken: string;
+  refreshToken: string;
+}
+export interface RefreshTokenInput {
+  cookieToken?: string;
+  deviceInfo: DeviceInfo;
+}
+
+export interface JWTPayload {
+  userInfo: {
+    username: string;
+    role: number;
+    id: string;
+  };
+}
