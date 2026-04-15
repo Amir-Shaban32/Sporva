@@ -1,4 +1,3 @@
-export * from "./service.type";
 export * from "./team.type";
 export * from "./league-standing.type";
 export * from "./manager.type";
