@@ -1,5 +1,5 @@
 import { hashPassword } from "../../utils/password";
-import { createUserService, getUserByUsernameService } from "../users.service";
+import { createUserService, getUserByUsernameService } from "../user.service";
 import { ServiceResult, ICreateUser, IUser } from "../../types";
 
 export const registerService = async (

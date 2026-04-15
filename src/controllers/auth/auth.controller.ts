@@ -6,7 +6,7 @@ import {
   refreshTokenService,
 } from "../../services";
 import { SERVICE_ERROR_STATUS } from "../../config";
-import { extractDeviceInfo } from "../../utils/deviceInfo";
+import { extractDeviceInfo } from "../../utils/device-info";
 
 export const handleLogin = async (req: Request, res: Response) => {
   const incomingCookieToken = req.cookies?.token as string | undefined;

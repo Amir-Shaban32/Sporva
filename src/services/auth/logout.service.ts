@@ -1,5 +1,5 @@
 import { LogoutInput, ServiceResult } from "../../types";
-import { deleteTokenService, getTokenByToken } from "./refreshToken.service";
+import { deleteTokenService, getTokenByToken } from "./refresh-token.service";
 
 export const logoutService = async (
   input: LogoutInput,

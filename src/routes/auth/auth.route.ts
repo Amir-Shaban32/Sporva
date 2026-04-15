@@ -13,7 +13,7 @@ import { validate } from "../../middleware/validate.middleware";
 import {
   authLimiter,
   refreshTokenLimiter,
-} from "../../middleware/rate_limit.middleware";
+} from "../../middleware/rate-limit.middleware";
 
 const router: Router = Router();
 

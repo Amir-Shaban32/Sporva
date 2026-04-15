@@ -1,13 +1,13 @@
 import { JWTPayload, RefreshTokenInput, RefreshTokenResult } from "../../types";
 import { ServiceResult } from "../../types";
 import { generateTokens } from "../../utils/jwt";
-import { getUserByUsernameService } from "../users.service";
+import { getUserByUsernameService } from "../user.service";
 import {
   revokeAllUserTokensService,
   deleteTokenService,
   getTokenByToken,
   createTokenService,
-} from "./refreshToken.service";
+} from "./refresh-token.service";
 import jwt from "jsonwebtoken";
 
 const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY!;

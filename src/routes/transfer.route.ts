@@ -6,7 +6,7 @@ import {
   getTransfersByPlayer,
   getTransfersByTeam,
 } from "../controllers";
-import { sensitiveWriteLimiter } from "../middleware/rate_limit.middleware";
+import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
 
 const router: Router = Router();
 

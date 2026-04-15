@@ -5,7 +5,7 @@ import {
   getTokenByToken,
   revokeAllUserTokensService,
   deleteTokenService,
-} from "./refreshToken.service";
+} from "./refresh-token.service";
 import { comparePassword } from "../../utils/password";
 import { generateTokens } from "../../utils/jwt";
 import { LoginInput, LoginResult } from "../../types/auth.type";
