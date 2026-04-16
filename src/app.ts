@@ -12,6 +12,7 @@ import managerRouter from "./routes/manager.route";
 import managerContractRouter from "./routes/manager-contract.route";
 import leagueStandingsRouter from "./routes/league-standing.route";
 import authRouter from "./routes/auth/auth.route";
+import { errorHandler } from "./middleware/error-handler.middleware";
 
 const app: Application = express();
 
@@ -31,5 +32,7 @@ app.use("/api/managers", managerRouter);
 app.use("/api/managerContracts", managerContractRouter);
 app.use("/api/league", leagueStandingsRouter);
 app.use("/auth", authRouter);
+
+app.use(errorHandler);
 
 export default app;
