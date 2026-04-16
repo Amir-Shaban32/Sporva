@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config";
+import { catchAsync } from "../utils/catch-async";
 import {
   getLeagueTableService,
   getLeagueTableByMostWinsService,
@@ -10,101 +10,51 @@ import {
   getLeagueTableByGoalsDifferenceService,
 } from "../services";
 
-export const getLeagueTable = async (req: Request, res: Response) => {
-  const result = await getLeagueTableService();
+export const getLeagueTable = catchAsync(
+  async (_req: Request, res: Response) => {
+    const standings = await getLeagueTableService();
+    return res.status(200).json({ standings });
+  },
+);
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+export const getLeagueTableByMostWins = catchAsync(
+  async (_req: Request, res: Response) => {
+    const standings = await getLeagueTableByMostWinsService();
+    return res.status(200).json({ standings });
+  },
+);
 
-  return res.status(200).json({ standings: result.data });
-};
+export const getLeagueTableByMostDraws = catchAsync(
+  async (_req: Request, res: Response) => {
+    const standings = await getLeagueTableByMostDrawsService();
+    return res.status(200).json({ standings });
+  },
+);
 
-export const getLeagueTableByMostWins = async (req: Request, res: Response) => {
-  const result = await getLeagueTableByMostWinsService();
+export const getLeagueTableByLeastLosses = catchAsync(
+  async (_req: Request, res: Response) => {
+    const standings = await getLeagueTableByLeastLossesService();
+    return res.status(200).json({ standings });
+  },
+);
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+export const getLeagueTableByMostGoalsFor = catchAsync(
+  async (_req: Request, res: Response) => {
+    const standings = await getLeagueTableByMostGoalsForService();
+    return res.status(200).json({ standings });
+  },
+);
 
-  return res.status(200).json({ standings: result.data });
-};
+export const getLeagueTableByLeastGoalsAgainst = catchAsync(
+  async (_req: Request, res: Response) => {
+    const standings = await getLeagueTableByLeastGoalsAgainstService();
+    return res.status(200).json({ standings });
+  },
+);
 
-export const getLeagueTableByMostDraws = async (
-  req: Request,
-  res: Response,
-) => {
-  const result = await getLeagueTableByMostDrawsService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ standings: result.data });
-};
-
-export const getLeagueTableByLeastLosses = async (
-  req: Request,
-  res: Response,
-) => {
-  const result = await getLeagueTableByLeastLossesService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ standings: result.data });
-};
-
-export const getLeagueTableByMostGoalsFor = async (
-  req: Request,
-  res: Response,
-) => {
-  const result = await getLeagueTableByMostGoalsForService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ standings: result.data });
-};
-
-export const getLeagueTableByLeastGoalsAgainst = async (
-  req: Request,
-  res: Response,
-) => {
-  const result = await getLeagueTableByLeastGoalsAgainstService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ standings: result.data });
-};
-
-export const getLeagueTableByGoalsDifference = async (
-  req: Request,
-  res: Response,
-) => {
-  const result = await getLeagueTableByGoalsDifferenceService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ standings: result.data });
-};
+export const getLeagueTableByGoalsDifference = catchAsync(
+  async (_req: Request, res: Response) => {
+    const standings = await getLeagueTableByGoalsDifferenceService();
+    return res.status(200).json({ standings });
+  },
+);

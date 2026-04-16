@@ -1,5 +1,6 @@
-import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config";
+import { Request, Response, NextFunction } from "express";
+import { catchAsync } from "../utils/catch-async";
+import { BadRequestError } from "../errors/app-error";
 import {
   createUserService,
   getUserByIdService,
@@ -11,127 +12,74 @@ import {
   countUsersService,
 } from "../services";
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = catchAsync(async (req: Request, res: Response) => {
   const data = req.body;
+  const user = await createUserService(data);
+  return res.status(201).json({ user });
+});
 
-  const result = await createUserService(data);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(201).json({ user: result.data });
-};
-
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!id) {
-    return res.status(400).json({ message: "Bad request!" });
+    throw new BadRequestError("Bad request! ID is required");
   }
 
-  const result = await getUserByIdService(id as string);
+  const user = await getUserByIdService(id as string);
+  return res.status(200).json({ user });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+export const getUserByUsername = catchAsync(
+  async (req: Request, res: Response) => {
+    const { username } = req.query;
+    if (!username) {
+      throw new BadRequestError("Bad request! Username is required");
+    }
 
-  return res.status(200).json({ user: result.data });
-};
+    const user = await getUserByUsernameService(username as string);
+    return res.status(200).json({ user });
+  },
+);
 
-export const getUserByUsername = async (req: Request, res: Response) => {
-  const { username } = req.query;
-  if (!username) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
+export const getUserByEmail = catchAsync(
+  async (req: Request, res: Response) => {
+    const { email } = req.query;
+    if (!email) {
+      throw new BadRequestError("Bad request! Email is required");
+    }
 
-  const result = await getUserByUsernameService(username as string);
+    const user = await getUserByEmailService(email as string);
+    return res.status(200).json({ user });
+  },
+);
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ user: result.data });
-};
-
-export const getUserByEmail = async (req: Request, res: Response) => {
-  const { email } = req.query;
-  if (!email) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getUserByEmailService(email as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ user: result.data });
-};
-
-export const getAllUsers = async (req: Request, res: Response) => {
+export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const page = req.query.page ? parseInt(req.query.page as string) : 1;
   const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
 
-  const result = await getAllUsersService(page, limit);
+  const users = await getAllUsersService(page, limit);
+  return res.status(200).json({ users });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ users: result.data });
-};
-
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const data = req.body;
-  if (!id) return res.status(400).json({ message: "Bad request!" });
+  if (!id) throw new BadRequestError("Bad request! ID is required");
 
-  const result = await updateUserService(id as string, data);
+  const user = await updateUserService(id as string, data);
+  return res.status(200).json({ user });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ user: result.data });
-};
-
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!id) {
-    return res.status(400).json({ message: "Bad request!" });
+    throw new BadRequestError("Bad request! ID is required");
   }
 
-  const result = await deleteUserService(id as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
+  await deleteUserService(id as string);
   return res.status(200).json({ message: "User deleted successfully" });
-};
+});
 
-export const countUsers = async (req: Request, res: Response) => {
-  const result = await countUsersService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ count: result.data });
-};
+export const countUsers = catchAsync(async (_req: Request, res: Response) => {
+  const count = await countUsersService();
+  return res.status(200).json({ count });
+});

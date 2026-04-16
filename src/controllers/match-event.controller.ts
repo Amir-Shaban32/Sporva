@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config";
+import { catchAsync } from "../utils/catch-async";
+import { BadRequestError } from "../errors/app-error";
 import {
   createMatchEventService,
   getMatchEventsByMatchService,
@@ -9,84 +10,59 @@ import {
 } from "../services";
 import { Event_types } from "../../generated/prisma";
 
-export const createMatchEvent = async (req: Request, res: Response) => {
-  const data = req.body;
+export const createMatchEvent = catchAsync(
+  async (req: Request, res: Response) => {
+    const event = await createMatchEventService(req.body);
+    return res.status(201).json({ event });
+  },
+);
 
-  const result = await createMatchEventService(data);
+export const getMatchEventsByMatch = catchAsync(
+  async (req: Request, res: Response) => {
+    const { match_id } = req.params;
+    if (!match_id) {
+      throw new BadRequestError("Bad request! Match ID is required");
+    }
 
-  if (!result.success) {
+    const events = await getMatchEventsByMatchService(match_id as string);
+    return res.status(200).json({ events });
+  },
+);
+
+export const getMatchEventsByType = catchAsync(
+  async (req: Request, res: Response) => {
+    const { event_type } = req.query;
+    if (!event_type) {
+      throw new BadRequestError("Bad request! Event type is required");
+    }
+
+    const events = await getMatchEventsByTypeService(event_type as Event_types);
+    return res.status(200).json({ events });
+  },
+);
+
+export const getMatchEventsByPlayer = catchAsync(
+  async (req: Request, res: Response) => {
+    const { player_id } = req.params;
+    if (!player_id) {
+      throw new BadRequestError("Bad request! Player ID is required");
+    }
+
+    const events = await getMatchEventsByPlayerService(player_id as string);
+    return res.status(200).json({ events });
+  },
+);
+
+export const deleteMatchEvent = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    if (!id) {
+      throw new BadRequestError("Bad request! ID is required");
+    }
+
+    await deleteMatchEventService(id as string);
     return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(201).json({ event: result.data });
-};
-
-export const getMatchEventsByMatch = async (req: Request, res: Response) => {
-  const { match_id } = req.params;
-  if (!match_id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getMatchEventsByMatchService(match_id as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ events: result.data });
-};
-
-export const getMatchEventsByType = async (req: Request, res: Response) => {
-  const { event_type } = req.query;
-  if (!event_type) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getMatchEventsByTypeService(event_type as Event_types);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ events: result.data });
-};
-
-export const getMatchEventsByPlayer = async (req: Request, res: Response) => {
-  const { player_id } = req.params;
-  if (!player_id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getMatchEventsByPlayerService(player_id as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ events: result.data });
-};
-
-export const deleteMatchEvent = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  if (!id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await deleteMatchEventService(id as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ message: "Match event deleted successfully" });
-};
+      .status(200)
+      .json({ message: "Match event deleted successfully" });
+  },
+);

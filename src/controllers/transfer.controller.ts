@@ -1,55 +1,39 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config";
+import { catchAsync } from "../utils/catch-async";
+import { BadRequestError } from "../errors/app-error";
 import {
   createTransferService,
   getTransfersByPlayerService,
   getTransfersByTeamService,
 } from "../services";
 
-export const createTransfer = async (req: Request, res: Response) => {
-  const data = req.body;
+export const createTransfer = catchAsync(
+  async (req: Request, res: Response) => {
+    const transfer = await createTransferService(req.body);
+    return res.status(201).json({ transfer });
+  },
+);
 
-  const result = await createTransferService(data);
+export const getTransfersByPlayer = catchAsync(
+  async (req: Request, res: Response) => {
+    const { player_id } = req.params;
+    if (!player_id) {
+      throw new BadRequestError("Bad request! Player ID is required");
+    }
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+    const transfers = await getTransfersByPlayerService(player_id as string);
+    return res.status(200).json({ transfers });
+  },
+);
 
-  return res.status(201).json({ transfer: result.data });
-};
+export const getTransfersByTeam = catchAsync(
+  async (req: Request, res: Response) => {
+    const { team_id } = req.params;
+    if (!team_id) {
+      throw new BadRequestError("Bad request! Team ID is required");
+    }
 
-export const getTransfersByPlayer = async (req: Request, res: Response) => {
-  const { player_id } = req.params;
-  if (!player_id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getTransfersByPlayerService(player_id as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ transfers: result.data });
-};
-
-export const getTransfersByTeam = async (req: Request, res: Response) => {
-  const { team_id } = req.params;
-  if (!team_id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getTransfersByTeamService(team_id as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ transfers: result.data });
-};
+    const transfers = await getTransfersByTeamService(team_id as string);
+    return res.status(200).json({ transfers });
+  },
+);

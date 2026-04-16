@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config";
+import { catchAsync } from "../utils/catch-async";
+import { BadRequestError } from "../errors/app-error";
 import {
   scheduleMatchService,
   getMatchByTeamService,
@@ -15,175 +16,110 @@ import {
 } from "../services";
 import { Match_status, Competitions } from "../../generated/prisma";
 
-export const scheduleMatch = async (req: Request, res: Response) => {
-  const data = req.body;
+export const scheduleMatch = catchAsync(async (req: Request, res: Response) => {
+  const match = await scheduleMatchService(req.body);
+  return res.status(201).json({ match });
+});
 
-  const result = await scheduleMatchService(data);
+export const getMatchByTeam = catchAsync(
+  async (req: Request, res: Response) => {
+    const { team_id } = req.params;
+    if (!team_id) {
+      throw new BadRequestError("Bad request! Team ID is required");
+    }
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+    const matches = await getMatchByTeamService(team_id as string);
+    return res.status(200).json({ matches });
+  },
+);
 
-  return res.status(201).json({ match: result.data });
-};
+export const getLiveMatches = catchAsync(
+  async (_req: Request, res: Response) => {
+    const matches = await getLiveMatchesService();
+    return res.status(200).json({ matches });
+  },
+);
 
-export const getMatchByTeam = async (req: Request, res: Response) => {
-  const { team_id } = req.params;
-  if (!team_id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
+export const getMatchesByStatus = catchAsync(
+  async (req: Request, res: Response) => {
+    const { status } = req.query;
+    if (!status) {
+      throw new BadRequestError("Bad request! Status is required");
+    }
 
-  const result = await getMatchByTeamService(team_id as string);
+    const matches = await getMatchesByStatusService(status as Match_status);
+    return res.status(200).json({ matches });
+  },
+);
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+export const getMatchesByCompetition = catchAsync(
+  async (req: Request, res: Response) => {
+    const { competition } = req.query;
+    if (!competition) {
+      throw new BadRequestError("Bad request! Competition is required");
+    }
 
-  return res.status(200).json({ matches: result.data });
-};
+    const matches = await getMatchesByCompetitionService(
+      competition as Competitions,
+    );
+    return res.status(200).json({ matches });
+  },
+);
 
-export const getLiveMatches = async (req: Request, res: Response) => {
-  const result = await getLiveMatchesService();
+export const getMatchesBySeasonEndpoint = catchAsync(
+  async (req: Request, res: Response) => {
+    const { season } = req.query;
+    if (!season) {
+      throw new BadRequestError("Bad request! Season is required");
+    }
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+    const matches = await getMatchesBySeason(season as string);
+    return res.status(200).json({ matches });
+  },
+);
 
-  return res.status(200).json({ matches: result.data });
-};
+export const getMatchesByDate = catchAsync(
+  async (req: Request, res: Response) => {
+    const { date } = req.query;
+    if (!date) {
+      throw new BadRequestError("Bad request! Date is required");
+    }
 
-export const getMatchesByStatus = async (req: Request, res: Response) => {
-  const { status } = req.query;
-  if (!status) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
+    const matches = await getMatchesByDateService(new Date(date as string));
+    return res.status(200).json({ matches });
+  },
+);
 
-  const result = await getMatchesByStatusService(status as Match_status);
+export const getMatchesByRound = catchAsync(
+  async (req: Request, res: Response) => {
+    const { round } = req.query;
+    if (!round) {
+      throw new BadRequestError("Bad request! Round is required");
+    }
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+    const matches = await getMatchesByRoundService(parseInt(round as string));
+    return res.status(200).json({ matches });
+  },
+);
 
-  return res.status(200).json({ matches: result.data });
-};
+export const getMatchesWithExtraTime = catchAsync(
+  async (_req: Request, res: Response) => {
+    const matches = await getMatchesWithExtraTimeService();
+    return res.status(200).json({ matches });
+  },
+);
 
-export const getMatchesByCompetition = async (req: Request, res: Response) => {
-  const { competition } = req.query;
-  if (!competition) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
+export const getMatchesWithPenalties = catchAsync(
+  async (_req: Request, res: Response) => {
+    const matches = await getMatchesWithPenaltiesService();
+    return res.status(200).json({ matches });
+  },
+);
 
-  const result = await getMatchesByCompetitionService(
-    competition as Competitions,
-  );
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ matches: result.data });
-};
-
-export const getMatchesBySeasonEndpoint = async (
-  req: Request,
-  res: Response,
-) => {
-  const { season } = req.query;
-  if (!season) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getMatchesBySeason(season as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ matches: result.data });
-};
-
-export const getMatchesByDate = async (req: Request, res: Response) => {
-  const { date } = req.query;
-  if (!date) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getMatchesByDateService(new Date(date as string));
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ matches: result.data });
-};
-
-export const getMatchesByRound = async (req: Request, res: Response) => {
-  const { round } = req.query;
-  if (!round) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getMatchesByRoundService(parseInt(round as string));
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ matches: result.data });
-};
-
-export const getMatchesWithExtraTime = async (req: Request, res: Response) => {
-  const result = await getMatchesWithExtraTimeService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ matches: result.data });
-};
-
-export const getMatchesWithPenalties = async (req: Request, res: Response) => {
-  const result = await getMatchesWithPenaltiesService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ matches: result.data });
-};
-
-export const updateMatch = async (req: Request, res: Response) => {
+export const updateMatch = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const data = req.body;
-  if (!id) return res.status(400).json({ message: "Bad request!" });
+  if (!id) throw new BadRequestError("Bad request! ID is required");
 
-  const result = await updateMatchService(id as string, data);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ match: result.data });
-};
+  const match = await updateMatchService(id as string, req.body);
+  return res.status(200).json({ match });
+});

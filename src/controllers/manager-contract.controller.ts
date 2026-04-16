@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config";
+import { catchAsync } from "../utils/catch-async";
+import { BadRequestError } from "../errors/app-error";
 import {
   createManagerContractService,
   getActiveManagerContractsService,
@@ -9,110 +10,65 @@ import {
   getManagerContractsByIntervalService,
 } from "../services";
 
-export const createManagerContract = async (req: Request, res: Response) => {
-  const data = req.body;
+export const createManagerContract = catchAsync(
+  async (req: Request, res: Response) => {
+    const contract = await createManagerContractService(req.body);
+    return res.status(201).json({ contract });
+  },
+);
 
-  const result = await createManagerContractService(data);
+export const getActiveManagerContracts = catchAsync(
+  async (_req: Request, res: Response) => {
+    const contracts = await getActiveManagerContractsService();
+    return res.status(200).json({ contracts });
+  },
+);
 
-  if (!result.success) {
+export const getExpiredManagerContracts = catchAsync(
+  async (_req: Request, res: Response) => {
+    const contracts = await getExpiredManagerContractsService();
+    return res.status(200).json({ contracts });
+  },
+);
+
+export const getManagerContractsByManager = catchAsync(
+  async (req: Request, res: Response) => {
+    const { manager_id } = req.params;
+    if (!manager_id) {
+      throw new BadRequestError("Bad request! Manager ID is required");
+    }
+
+    const contracts = await getManagerContractsByManagerService(
+      manager_id as string,
+    );
+    return res.status(200).json({ contracts });
+  },
+);
+
+export const deActivateManagerContract = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    if (!id) {
+      throw new BadRequestError("Bad request! ID is required");
+    }
+
+    await deActivateManagerContractService(id as string);
     return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+      .status(200)
+      .json({ message: "Contract deactivated successfully" });
+  },
+);
 
-  return res.status(201).json({ contract: result.data });
-};
+export const getManagerContractsByInterval = catchAsync(
+  async (req: Request, res: Response) => {
+    const { period } = req.query;
+    if (!period) {
+      throw new BadRequestError("Bad request! Period is required");
+    }
 
-export const getActiveManagerContracts = async (
-  req: Request,
-  res: Response,
-) => {
-  const result = await getActiveManagerContractsService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ contracts: result.data });
-};
-
-export const getExpiredManagerContracts = async (
-  req: Request,
-  res: Response,
-) => {
-  const result = await getExpiredManagerContractsService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ contracts: result.data });
-};
-
-export const getManagerContractsByManager = async (
-  req: Request,
-  res: Response,
-) => {
-  const { manager_id } = req.params;
-  if (!manager_id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getManagerContractsByManagerService(
-    manager_id as string,
-  );
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ contracts: result.data });
-};
-
-export const deActivateManagerContract = async (
-  req: Request,
-  res: Response,
-) => {
-  const { id } = req.params;
-  if (!id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await deActivateManagerContractService(id as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ message: "Contract deactivated successfully" });
-};
-
-export const getManagerContractsByInterval = async (
-  req: Request,
-  res: Response,
-) => {
-  const { period } = req.query;
-  if (!period) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getManagerContractsByIntervalService(
-    parseInt(period as string),
-  );
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ contracts: result.data });
-};
+    const contracts = await getManagerContractsByIntervalService(
+      parseInt(period as string),
+    );
+    return res.status(200).json({ contracts });
+  },
+);

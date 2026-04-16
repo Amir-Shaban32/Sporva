@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config";
+import { catchAsync } from "../utils/catch-async";
+import { BadRequestError } from "../errors/app-error";
 import {
   getPlayerByNameService,
   getPlayerByTeamService,
@@ -12,130 +13,90 @@ import {
 } from "../services";
 import { Positions } from "../../generated/prisma";
 
-export const createPlayer = async (req: Request, res: Response) => {
+export const createPlayer = catchAsync(async (req: Request, res: Response) => {
   const data = req.body;
 
-  const result = await createPlayerService(data);
+  const player = await createPlayerService(data);
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+  return res.status(201).json({ team: player });
+});
 
-  return res.status(201).json({ team: result.data });
-};
+export const getPlayerByName = catchAsync(
+  async (req: Request, res: Response) => {
+    const { f_name, l_name } = req.query;
+    if (!f_name && !l_name) {
+      throw new BadRequestError("Bad request! First or last name is required");
+    }
 
-export const getPlayerByName = async (req: Request, res: Response) => {
-  const { f_name, l_name } = req.query;
-  if (!f_name && !l_name) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
+    const players = await getPlayerByNameService({
+      f_name: f_name as string,
+      l_name: l_name as string,
+    });
 
-  const result = await getPlayerByNameService({
-    f_name: f_name as string,
-    l_name: l_name as string,
-  });
+    return res.status(200).json({ players });
+  },
+);
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+export const getPlayerByTeam = catchAsync(
+  async (req: Request, res: Response) => {
+    const { team_id } = req.params;
+    if (!team_id) {
+      throw new BadRequestError("Bad request! Team ID is required");
+    }
 
-  return res.status(200).json({ players: result.data });
-};
+    const players = await getPlayerByTeamService(team_id as string);
 
-export const getPlayerByTeam = async (req: Request, res: Response) => {
-  const { team_id } = req.params;
-  if (!team_id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
+    return res.status(200).json({ players });
+  },
+);
 
-  const result = await getPlayerByTeamService(team_id as string);
+export const getPlayerByPosition = catchAsync(
+  async (req: Request, res: Response) => {
+    const { position } = req.query;
+    if (!position) {
+      throw new BadRequestError("Bad request! Position is required");
+    }
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+    const players = await getPlayerByPositionService(position as Positions);
 
-  return res.status(200).json({ players: result.data });
-};
+    return res.status(200).json({ players });
+  },
+);
 
-export const getPlayerByPosition = async (req: Request, res: Response) => {
-  const { position } = req.query;
-  if (!position) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
+export const getPlayerByNationality = catchAsync(
+  async (req: Request, res: Response) => {
+    const { nationality } = req.query;
+    if (!nationality) {
+      throw new BadRequestError("Bad request! Nationality is required");
+    }
 
-  const result = await getPlayerByPositionService(position as Positions);
+    const players = await getPlayerByNationalityService(nationality as string);
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+    return res.status(200).json({ players });
+  },
+);
 
-  return res.status(200).json({ players: result.data });
-};
-
-export const getPlayerByNationality = async (req: Request, res: Response) => {
-  const { nationality } = req.query;
-  if (!nationality) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getPlayerByNationalityService(nationality as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ players: result.data });
-};
-
-export const updatePlayer = async (req: Request, res: Response) => {
+export const updatePlayer = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const data = req.body;
-  if (!id) return res.status(400).json({ message: "Bad request!" });
+  if (!id) throw new BadRequestError("Bad request! ID is required");
 
-  const result = await updatePlayerService(id as string, data);
+  const player = await updatePlayerService(id as string, data);
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+  return res.status(200).json({ player });
+});
 
-  return res.status(200).json({ player: result.data });
-};
-
-export const deletePlayer = async (req: Request, res: Response) => {
+export const deletePlayer = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  if (!id) return res.status(400).json({ message: "Bad request!" });
+  if (!id) throw new BadRequestError("Bad request! ID is required");
 
-  const result = await deletePlayerService(id as string);
+  const player = await deletePlayerService(id as string);
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+  return res.status(200).json({ player });
+});
 
-  return res.status(200).json({ player: result.data });
-};
+export const countPlayers = catchAsync(async (_req: Request, res: Response) => {
+  const count = await countPlayerService();
 
-export const countPlayers = async (req: Request, res: Response) => {
-  const result = await countPlayerService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ count: result.data });
-};
+  return res.status(200).json({ count });
+});

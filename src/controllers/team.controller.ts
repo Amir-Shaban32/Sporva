@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config";
+import { catchAsync } from "../utils/catch-async";
+import { BadRequestError } from "../errors/app-error";
 import {
   createTeamService,
   getTeamByIdService,
@@ -10,110 +11,58 @@ import {
   deleteTeamService,
 } from "../services";
 
-export const createTeam = async (req: Request, res: Response) => {
-  const data = req.body;
+export const createTeam = catchAsync(async (req: Request, res: Response) => {
+  const team = await createTeamService(req.body);
+  return res.status(201).json({ team });
+});
 
-  const result = await createTeamService(data);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(201).json({ team: result.data });
-};
-
-export const getTeamById = async (req: Request, res: Response) => {
+export const getTeamById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!id) {
-    return res.status(400).json({ message: "Bad request!" });
+    throw new BadRequestError("Bad request! ID is required");
   }
 
-  const result = await getTeamByIdService(id as string);
+  const team = await getTeamByIdService(id as string);
+  return res.status(200).json({ team });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ team: result.data });
-};
-
-export const getTeamByName = async (req: Request, res: Response) => {
+export const getTeamByName = catchAsync(async (req: Request, res: Response) => {
   const { name } = req.query;
   if (!name) {
-    return res.status(400).json({ message: "Bad request!" });
+    throw new BadRequestError("Bad request! Name is required");
   }
 
-  const result = await getTeamByNameService(name as string);
+  const teams = await getTeamByNameService(name as string);
+  return res.status(200).json({ teams });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ team: result.data });
-};
-
-export const getTeamByCity = async (req: Request, res: Response) => {
+export const getTeamByCity = catchAsync(async (req: Request, res: Response) => {
   const { city } = req.query;
   if (!city) {
-    return res.status(400).json({ message: "Bad request!" });
+    throw new BadRequestError("Bad request! City is required");
   }
 
-  const result = await getRefereeByCityService(city as string);
+  const teams = await getRefereeByCityService(city as string);
+  return res.status(200).json({ teams });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ teams: result.data });
-};
-
-export const updateTeam = async (req: Request, res: Response) => {
+export const updateTeam = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const data = req.body;
-  if (!id) return res.status(400).json({ message: "Bad request!" });
+  if (!id) throw new BadRequestError("Bad request! ID is required");
 
-  const result = await updateTeamService(id as string, data);
+  const team = await updateTeamService(id as string, req.body);
+  return res.status(200).json({ team });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ team: result.data });
-};
-
-export const deleteTeam = async (req: Request, res: Response) => {
+export const deleteTeam = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  if (!id) return res.status(400).json({ message: "Bad request!" });
+  if (!id) throw new BadRequestError("Bad request! ID is required");
 
-  const result = await deleteTeamService(id as string);
+  await deleteTeamService(id as string);
+  return res.status(200).json({ message: "Team deleted successfully" });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ team: result.data });
-};
-
-export const countTeams = async (req: Request, res: Response) => {
-  const result = await countTeamService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ count: result.data });
-};
+export const countTeams = catchAsync(async (_req: Request, res: Response) => {
+  const count = await countTeamService();
+  return res.status(200).json({ count });
+});

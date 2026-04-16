@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { SERVICE_ERROR_STATUS } from "../config";
+import { catchAsync } from "../utils/catch-async";
+import { BadRequestError } from "../errors/app-error";
 import {
   createRefereeService,
   getRefereeByIdService,
@@ -11,130 +12,81 @@ import {
   deleteRefereeService,
 } from "../services";
 
-export const createReferee = async (req: Request, res: Response) => {
-  const data = req.body;
+export const createReferee = catchAsync(async (req: Request, res: Response) => {
+  const referee = await createRefereeService(req.body);
+  return res.status(201).json({ referee });
+});
 
-  const result = await createRefereeService(data);
+export const getRefereeById = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.query;
+    if (!id) {
+      throw new BadRequestError("Bad request! ID is required");
+    }
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+    const referee = await getRefereeByIdService(id as string);
+    return res.status(200).json({ referee });
+  },
+);
 
-  return res.status(201).json({ referee: result.data });
-};
+export const getRefereeByName = catchAsync(
+  async (req: Request, res: Response) => {
+    const { f_name, l_name } = req.query;
+    if (!f_name && !l_name) {
+      throw new BadRequestError("Bad request! First or last name is required");
+    }
 
-export const getRefereeById = async (req: Request, res: Response) => {
-  const { id } = req.query;
-  if (!id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
+    const referees = await getRefereeByNameService({
+      f_name: f_name as string,
+      l_name: l_name as string,
+    });
+    return res.status(200).json({ referees });
+  },
+);
 
-  const result = await getRefereeByIdService(id as string);
+export const getRefereeByNationality = catchAsync(
+  async (req: Request, res: Response) => {
+    const { nationality } = req.query;
+    if (!nationality) {
+      throw new BadRequestError("Bad request! Nationality is required");
+    }
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
+    const referees = await getRefereeByNationalityService(
+      nationality as string,
+    );
+    return res.status(200).json({ referees });
+  },
+);
 
-  return res.status(200).json({ referee: result.data });
-};
+export const getRefereesByMatch = catchAsync(
+  async (req: Request, res: Response) => {
+    const { match_id } = req.params;
+    if (!match_id) {
+      throw new BadRequestError("Bad request! Match ID is required");
+    }
 
-export const getRefereeByName = async (req: Request, res: Response) => {
-  const { f_name, l_name } = req.query;
-  if (!f_name && !l_name) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
+    const referees = await getRefereesByMatchService(match_id as string);
+    return res.status(200).json({ referees });
+  },
+);
 
-  const result = await getRefereeByNameService({
-    f_name: f_name as string,
-    l_name: l_name as string,
-  });
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ referees: result.data });
-};
-
-export const getRefereeByNationality = async (req: Request, res: Response) => {
-  const { nationality } = req.query;
-  if (!nationality) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getRefereeByNationalityService(nationality as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ referees: result.data });
-};
-
-export const getRefereesByMatch = async (req: Request, res: Response) => {
-  const { match_id } = req.params;
-  if (!match_id) {
-    return res.status(400).json({ message: "Bad request!" });
-  }
-
-  const result = await getRefereesByMatchService(match_id as string);
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ referees: result.data });
-};
-
-export const updateReferee = async (req: Request, res: Response) => {
+export const updateReferee = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const data = req.body;
-  if (!id) return res.status(400).json({ message: "Bad request!" });
+  if (!id) throw new BadRequestError("Bad request! ID is required");
 
-  const result = await updateRefereeService(id as string, data);
+  const referee = await updateRefereeService(id as string, req.body);
+  return res.status(200).json({ referee });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ referee: result.data });
-};
-
-export const deleteReferee = async (req: Request, res: Response) => {
+export const deleteReferee = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  if (!id) return res.status(400).json({ message: "Bad request!" });
+  if (!id) throw new BadRequestError("Bad request! ID is required");
 
-  const result = await deleteRefereeService(id as string);
+  await deleteRefereeService(id as string);
+  return res.status(200).json({ message: "Referee deleted successfully" });
+});
 
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ referee: result.data });
-};
-
-export const countReferees = async (req: Request, res: Response) => {
-  const result = await countRefereeService();
-
-  if (!result.success) {
-    return res
-      .status(SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"])
-      .json({ message: result.error });
-  }
-
-  return res.status(200).json({ count: result.data });
-};
+export const countReferees = catchAsync(async (req: Request, res: Response) => {
+  const count = await countRefereeService();
+  return res.status(200).json({ count });
+});
