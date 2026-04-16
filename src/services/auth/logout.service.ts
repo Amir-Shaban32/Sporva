@@ -1,22 +1,19 @@
-import { LogoutInput, ServiceResult } from "../../types";
+import { LogoutInput } from "../../types";
 import { deleteTokenService, getTokenByToken } from "./refresh-token.service";
+import { BadRequestError, NotFoundError } from "../../errors/app-error";
 
-export const logoutService = async (
-  input: LogoutInput,
-): Promise<ServiceResult<string>> => {
-  try {
-    const token = input.cookieToken;
-    if (!token)
-      return { success: false, error: "No token!", code: "NO_CONTENT" };
-
-    const foundToken = await getTokenByToken(token);
-    if (!foundToken.success)
-      return { success: false, error: "Not found!", code: "NOT_FOUND" };
-
-    await deleteTokenService(foundToken.data.id);
-
-    return { success: true, data: "Logged out successfully" };
-  } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+export const logoutService = async (input: LogoutInput): Promise<string> => {
+  const token = input.cookieToken;
+  if (!token) {
+    throw new BadRequestError("No token!");
   }
+
+  const foundToken = await getTokenByToken(token);
+  if (!foundToken) {
+    throw new NotFoundError("Token not found!");
+  }
+
+  await deleteTokenService(foundToken.id);
+
+  return "Logged out successfully";
 };

@@ -1,93 +1,94 @@
 import { refreshTokenRepository } from "../../repositories";
-import { ServiceResult } from "../../types";
+import { NotFoundError, ServerError } from "../../errors/app-error";
 import {
   ICreateRefreshToken,
   IRefreshToken,
   IUserId,
-} from "../../types/refresh-token.types";
+} from "../../types/refresh-token.type";
 
 export const createTokenService = async (
   data: ICreateRefreshToken,
-): Promise<ServiceResult<IRefreshToken>> => {
+): Promise<IRefreshToken> => {
   try {
     const refreshToken = await refreshTokenRepository.createToken(data);
-    return { success: true, data: refreshToken };
+    return refreshToken;
   } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+    throw new ServerError("Failed to create refresh token");
   }
 };
 
-export const getTokenById = async (
-  id: string,
-): Promise<ServiceResult<IRefreshToken>> => {
+export const getTokenById = async (id: string): Promise<IRefreshToken> => {
   try {
     const refreshToken = await refreshTokenRepository.findTokenById(id);
 
-    if (!refreshToken)
-      return { success: false, error: "No token", code: "NOT_FOUND" };
-    return { success: true, data: refreshToken };
+    if (!refreshToken) throw new NotFoundError("Refresh token not found");
+    return refreshToken;
   } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+    if (error instanceof NotFoundError) throw error;
+    throw new ServerError("Failed to retrieve refresh token");
   }
 };
 
 export const getTokenByToken = async (
   token: string,
-): Promise<ServiceResult<IRefreshToken>> => {
+): Promise<IRefreshToken> => {
   try {
     const refreshToken = await refreshTokenRepository.findTokenByToken(token);
 
-    if (!refreshToken)
-      return { success: false, error: "No token", code: "NOT_FOUND" };
-    return { success: true, data: refreshToken };
+    if (!refreshToken) throw new NotFoundError("Refresh token not found");
+    return refreshToken;
   } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+    if (error instanceof NotFoundError) throw error;
+    throw new ServerError("Failed to retrieve refresh token");
   }
 };
 
 export const getRefreshTokenByUserIdService = async (
   user_id: string,
-): Promise<ServiceResult<IRefreshToken[]>> => {
+): Promise<IRefreshToken[]> => {
   try {
     const refreshToken =
       await refreshTokenRepository.findTokenByUserId(user_id);
     if (!refreshToken)
-      return { success: false, error: "No token", code: "NOT_FOUND" };
-    return { success: true, data: refreshToken };
+      throw new NotFoundError("No refresh tokens found for user");
+    return refreshToken;
   } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+    if (error instanceof NotFoundError) throw error;
+    throw new ServerError("Failed to retrieve refresh tokens");
   }
 };
 
 export const getUserIdByRefreshTokenService = async (
   user_id: string,
-): Promise<ServiceResult<IUserId[]>> => {
+): Promise<IUserId[]> => {
   try {
     const user = await refreshTokenRepository.findUserByToken(user_id);
-    if (!user) return { success: false, error: "No user", code: "NOT_FOUND" };
-    return { success: true, data: user };
+    if (!user) throw new NotFoundError("User not found");
+    return user;
   } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+    if (error instanceof NotFoundError) throw error;
+    throw new ServerError("Failed to retrieve user");
   }
 };
 
-export const revokeAllUserTokensService = async (user_id: string) => {
+export const revokeAllUserTokensService = async (
+  user_id: string,
+): Promise<void> => {
   try {
     await refreshTokenRepository.revoke(user_id);
   } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+    throw new ServerError("Failed to revoke user tokens");
   }
 };
 
-export const deleteTokenService = async (
-  id: string,
-): Promise<ServiceResult<string>> => {
+export const deleteTokenService = async (id: string): Promise<string> => {
   try {
     const existing = await refreshTokenRepository.findTokenById(id);
-    if (!existing)
-      return { success: false, error: "No token", code: "NOT_FOUND" };
-    return { success: true, data: "deleted successfully" };
+    if (!existing) throw new NotFoundError("Refresh token not found");
+    await refreshTokenRepository.delete(id);
+    return "Refresh token deleted successfully";
   } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+    if (error instanceof NotFoundError) throw error;
+    throw new ServerError("Failed to delete refresh token");
   }
 };

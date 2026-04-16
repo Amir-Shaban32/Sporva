@@ -1,32 +1,25 @@
 import { hashPassword } from "../../utils/password";
 import { createUserService, getUserByUsernameService } from "../user.service";
-import { ServiceResult, ICreateUser, IUser } from "../../types";
+import { ICreateUser, IUser } from "../../types";
+import { ConflictError } from "../../errors/app-error";
 
-export const registerService = async (
-  data: ICreateUser,
-): Promise<ServiceResult<IUser>> => {
+export const registerService = async (data: ICreateUser): Promise<IUser> => {
   try {
-    const existing = await getUserByUsernameService(data.username);
-    if (existing.success)
-      return {
-        success: false,
-        error: "User already exists!",
-        code: "CONFLICT",
-      };
-
-    const hashedPassword = await hashPassword(data.password);
-    const userData = { ...data, password: hashedPassword };
-
-    const user = await createUserService(userData);
-    if (!user.success)
-      return {
-        success: false,
-        error: user.error,
-        code: user.code ?? "DB_ERROR",
-      };
-
-    return { success: true, data: user.data };
-  } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+    await getUserByUsernameService(data.username);
+    throw new ConflictError("User already exists!");
+  } catch (error: any) {
+    // Expected: user not found, continue
+    if (
+      !(error instanceof ConflictError) &&
+      error.message !== "User not found"
+    ) {
+      throw error;
+    }
   }
+
+  const hashedPassword = await hashPassword(data.password);
+  const userData = { ...data, password: hashedPassword };
+
+  const user = await createUserService(userData);
+  return user;
 };
