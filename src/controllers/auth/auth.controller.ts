@@ -1,14 +1,15 @@
 import { Request, Response } from "express";
+import { catchAsync } from "../../utils/catch-async";
+import { UnauthorizedError, BadRequestError } from "../../errors/app-error";
 import {
   loginService,
   logoutService,
   registerService,
   refreshTokenService,
 } from "../../services";
-import { SERVICE_ERROR_STATUS } from "../../config";
 import { extractDeviceInfo } from "../../utils/device-info";
 
-export const handleLogin = async (req: Request, res: Response) => {
+export const handleLogin = catchAsync(async (req: Request, res: Response) => {
   const incomingCookieToken = req.cookies?.token as string | undefined;
 
   if (incomingCookieToken) {
@@ -26,12 +27,7 @@ export const handleLogin = async (req: Request, res: Response) => {
     incomingCookieToken,
   });
 
-  if (!result.success) {
-    const status = SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"] ?? 500;
-    return res.status(status).json({ status: "fail", message: result.error });
-  }
-
-  res.cookie("token", result.data.refreshToken, {
+  res.cookie("token", result.refreshToken, {
     httpOnly: true,
     secure: true,
     sameSite: "none",
@@ -40,61 +36,54 @@ export const handleLogin = async (req: Request, res: Response) => {
 
   return res.status(200).json({
     status: "success",
-    accessToken: result.data.accessToken,
+    accessToken: result.accessToken,
   });
-};
+});
 
-export const handleLogout = async (req: Request, res: Response) => {
+export const handleLogout = catchAsync(async (req: Request, res: Response) => {
   const cookieToken = req.cookies?.token as string | undefined;
 
-  const result = await logoutService({ cookieToken });
-
-  if (!result.success) {
-    const status = SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"] ?? 500;
-    return res.status(status).json({ status: "fail", message: result.error });
-  }
+  const message = await logoutService({ cookieToken });
 
   res.clearCookie("token", { httpOnly: true, sameSite: "none", secure: true });
-  return res.status(200).json({ message: `${result.data}` });
-};
+  return res.status(200).json({ message });
+});
 
-export const handleRegister = async (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
+export const handleRegister = catchAsync(
+  async (req: Request, res: Response) => {
+    const { username, email, password } = req.body;
 
-  const result = await registerService({ username, email, password });
+    const user = await registerService({ username, email, password });
 
-  if (!result.success) {
-    const status = SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"] ?? 500;
-    return res.status(status).json({ status: "fail", message: result.error });
-  }
+    return res.status(201).json({ status: "success", data: user });
+  },
+);
 
-  return res.status(201).json({ status: "success", data: result.data });
-};
+export const handleRefreshToken = catchAsync(
+  async (req: Request, res: Response) => {
+    const incomingCookieToken = req.cookies?.token as string | undefined;
 
-export const handleRefreshToken = async (req: Request, res: Response) => {
-  const incomingCookieToken = req.cookies?.token as string | undefined;
+    res.clearCookie("token", {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+    });
 
-  res.clearCookie("token", { httpOnly: true, sameSite: "none", secure: true });
+    const result = await refreshTokenService({
+      cookieToken: incomingCookieToken,
+      deviceInfo: extractDeviceInfo(req),
+    });
 
-  const result = await refreshTokenService({
-    cookieToken: incomingCookieToken,
-    deviceInfo: extractDeviceInfo(req),
-  });
+    res.cookie("token", result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
-  if (!result.success) {
-    const status = SERVICE_ERROR_STATUS[result.code ?? "DB_ERROR"] ?? 500;
-    return res.status(status).json({ status: "fail", message: result.error });
-  }
-
-  res.cookie("token", result.data.refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: 24 * 60 * 60 * 1000,
-  });
-
-  return res.status(200).json({
-    status: "success",
-    accessToken: result.data.accessToken,
-  });
-};
+    return res.status(200).json({
+      status: "success",
+      accessToken: result.accessToken,
+    });
+  },
+);
