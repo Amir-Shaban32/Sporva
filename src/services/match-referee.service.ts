@@ -1,58 +1,37 @@
 import { matchRefereeRepository } from "../repositories";
-import { ServiceResult, ICreateMatchReferee, IMatchReferee } from "../types";
+import { ICreateMatchReferee, IMatchReferee } from "../types";
+import { NotFoundError } from "../errors/app-error";
 
 export const assignRefereeToMatchService = async (
   data: ICreateMatchReferee,
-): Promise<ServiceResult<IMatchReferee>> => {
-  try {
-    const assignment = await matchRefereeRepository.assign(data);
-    return { success: true, data: assignment };
-  } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
-  }
+): Promise<IMatchReferee> => {
+  const assignment = await matchRefereeRepository.assign(data);
+  return assignment;
 };
 
 export const getRefereesByMatchService = async (
   match_id: string,
-): Promise<ServiceResult<IMatchReferee[]>> => {
-  try {
-    const referees = await matchRefereeRepository.findByMatch(match_id);
-    if (!referees.length)
-      return {
-        success: false,
-        error: "No referees found",
-        code: "NOT_FOUND",
-      };
-    return { success: true, data: referees };
-  } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+): Promise<IMatchReferee[]> => {
+  const referees = await matchRefereeRepository.findByMatch(match_id);
+  if (!referees.length) {
+    throw new NotFoundError("No referees found");
   }
+  return referees;
 };
 
 export const getMatchesByRefereeService = async (
   referee_id: string,
-): Promise<ServiceResult<IMatchReferee[]>> => {
-  try {
-    const matches = await matchRefereeRepository.findByReferee(referee_id);
-    if (!matches.length)
-      return {
-        success: false,
-        error: "No matches found",
-        code: "NOT_FOUND",
-      };
-    return { success: true, data: matches };
-  } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
+): Promise<IMatchReferee[]> => {
+  const matches = await matchRefereeRepository.findByReferee(referee_id);
+  if (!matches.length) {
+    throw new NotFoundError("No matches found");
   }
+  return matches;
 };
 
 export const unAssignRefereeFromMatchService = async (
   data: ICreateMatchReferee,
-): Promise<ServiceResult<IMatchReferee>> => {
-  try {
-    const result = await matchRefereeRepository.unAssign(data);
-    return { success: true, data: result };
-  } catch (error) {
-    return { success: false, code: "DB_ERROR", error: "Database error" };
-  }
+): Promise<IMatchReferee> => {
+  const result = await matchRefereeRepository.unAssign(data);
+  return result;
 };
