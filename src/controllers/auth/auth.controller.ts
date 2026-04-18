@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catch-async";
-import { UnauthorizedError, BadRequestError } from "../../errors/app-error";
 import {
   loginService,
   logoutService,
@@ -34,10 +33,7 @@ export const handleLogin = catchAsync(async (req: Request, res: Response) => {
     maxAge: 24 * 60 * 60 * 1000,
   });
 
-  return res.status(200).json({
-    status: "success",
-    accessToken: result.accessToken,
-  });
+  return res.ok("Login successful", { accessToken: result.accessToken });
 });
 
 export const handleLogout = catchAsync(async (req: Request, res: Response) => {
@@ -46,7 +42,7 @@ export const handleLogout = catchAsync(async (req: Request, res: Response) => {
   const message = await logoutService({ cookieToken });
 
   res.clearCookie("token", { httpOnly: true, sameSite: "none", secure: true });
-  return res.status(200).json({ message });
+  return res.ok("Logout successful", { message });
 });
 
 export const handleRegister = catchAsync(
@@ -55,7 +51,7 @@ export const handleRegister = catchAsync(
 
     const user = await registerService({ username, email, password });
 
-    return res.status(201).json({ status: "success", data: user });
+    return res.created("User registered successfully", { data: user });
   },
 );
 
@@ -81,8 +77,7 @@ export const handleRefreshToken = catchAsync(
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({
-      status: "success",
+    return res.ok("Token refreshed successfully", {
       accessToken: result.accessToken,
     });
   },

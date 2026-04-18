@@ -14,7 +14,7 @@ import {
 
 export const createReferee = catchAsync(async (req: Request, res: Response) => {
   const referee = await createRefereeService(req.body);
-  return res.status(201).json({ referee });
+  return res.created("Referee created successfully", { referee });
 });
 
 export const getRefereeById = catchAsync(
@@ -25,7 +25,7 @@ export const getRefereeById = catchAsync(
     }
 
     const referee = await getRefereeByIdService(id as string);
-    return res.status(200).json({ referee });
+    return res.ok("Referee retrieved successfully", { referee });
   },
 );
 
@@ -40,7 +40,7 @@ export const getRefereeByName = catchAsync(
       f_name: f_name as string,
       l_name: l_name as string,
     });
-    return res.status(200).json({ referees });
+    return res.ok("Referees retrieved successfully", { referees });
   },
 );
 
@@ -54,7 +54,7 @@ export const getRefereeByNationality = catchAsync(
     const referees = await getRefereeByNationalityService(
       nationality as string,
     );
-    return res.status(200).json({ referees });
+    return res.ok("Referees retrieved successfully", { referees });
   },
 );
 
@@ -66,7 +66,7 @@ export const getRefereesByMatch = catchAsync(
     }
 
     const referees = await getRefereesByMatchService(match_id as string);
-    return res.status(200).json({ referees });
+    return res.ok("Referees retrieved successfully", { referees });
   },
 );
 
@@ -75,7 +75,7 @@ export const updateReferee = catchAsync(async (req: Request, res: Response) => {
   if (!id) throw new BadRequestError("Bad request! ID is required");
 
   const referee = await updateRefereeService(id as string, req.body);
-  return res.status(200).json({ referee });
+  return res.ok("Referee updated successfully", { referee });
 });
 
 export const deleteReferee = catchAsync(async (req: Request, res: Response) => {
@@ -83,10 +83,10 @@ export const deleteReferee = catchAsync(async (req: Request, res: Response) => {
   if (!id) throw new BadRequestError("Bad request! ID is required");
 
   await deleteRefereeService(id as string);
-  return res.status(200).json({ message: "Referee deleted successfully" });
+  return res.ok("Referee deleted successfully");
 });
 
 export const countReferees = catchAsync(async (req: Request, res: Response) => {
   const count = await countRefereeService();
-  return res.status(200).json({ count });
+  return res.ok("Referee count retrieved successfully", { count });
 });

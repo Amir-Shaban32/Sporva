@@ -13,21 +13,25 @@ import {
 export const createManagerContract = catchAsync(
   async (req: Request, res: Response) => {
     const contract = await createManagerContractService(req.body);
-    return res.status(201).json({ contract });
+    return res.created("Manager contract created successfully", { contract });
   },
 );
 
 export const getActiveManagerContracts = catchAsync(
   async (_req: Request, res: Response) => {
     const contracts = await getActiveManagerContractsService();
-    return res.status(200).json({ contracts });
+    return res.ok("Active manager contracts retrieved successfully", {
+      contracts,
+    });
   },
 );
 
 export const getExpiredManagerContracts = catchAsync(
   async (_req: Request, res: Response) => {
     const contracts = await getExpiredManagerContractsService();
-    return res.status(200).json({ contracts });
+    return res.ok("Expired manager contracts retrieved successfully", {
+      contracts,
+    });
   },
 );
 
@@ -41,7 +45,7 @@ export const getManagerContractsByManager = catchAsync(
     const contracts = await getManagerContractsByManagerService(
       manager_id as string,
     );
-    return res.status(200).json({ contracts });
+    return res.ok("Manager contracts retrieved successfully", { contracts });
   },
 );
 
@@ -53,9 +57,7 @@ export const deActivateManagerContract = catchAsync(
     }
 
     await deActivateManagerContractService(id as string);
-    return res
-      .status(200)
-      .json({ message: "Contract deactivated successfully" });
+    return res.ok("Contract deactivated successfully");
   },
 );
 
@@ -69,6 +71,6 @@ export const getManagerContractsByInterval = catchAsync(
     const contracts = await getManagerContractsByIntervalService(
       parseInt(period as string),
     );
-    return res.status(200).json({ contracts });
+    return res.ok("Manager contracts retrieved successfully", { contracts });
   },
 );

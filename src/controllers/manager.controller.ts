@@ -13,7 +13,7 @@ import {
 export const createManager = catchAsync(async (req: Request, res: Response) => {
   const data = req.body;
   const manager = await createManagerService(data);
-  return res.status(201).json({ manager });
+  return res.created("Manager created successfully", { manager });
 });
 
 export const getManagerByName = catchAsync(
@@ -28,7 +28,7 @@ export const getManagerByName = catchAsync(
       l_name: l_name as string,
     });
 
-    return res.status(200).json({ managers });
+    return res.ok("Managers retrieved successfully", { managers });
   },
 );
 
@@ -42,7 +42,7 @@ export const getManagerByNationality = catchAsync(
     const managers = await getManagerByNationalityService(
       nationality as string,
     );
-    return res.status(200).json({ managers });
+    return res.ok("Managers retrieved successfully", { managers });
   },
 );
 
@@ -52,7 +52,7 @@ export const updateManager = catchAsync(async (req: Request, res: Response) => {
   if (!id) throw new BadRequestError("Bad request! ID is required");
 
   const manager = await updateManagerService(id as string, data);
-  return res.status(200).json({ manager });
+  return res.ok("Manager updated successfully", { manager });
 });
 
 export const deleteManager = catchAsync(async (req: Request, res: Response) => {
@@ -60,12 +60,12 @@ export const deleteManager = catchAsync(async (req: Request, res: Response) => {
   if (!id) throw new BadRequestError("Bad request! ID is required");
 
   const manager = await deleteManagerService(id as string);
-  return res.status(200).json({ manager });
+  return res.ok("Manager deleted successfully", { manager });
 });
 
 export const countManagers = catchAsync(
   async (_req: Request, res: Response) => {
     const count = await countManagerService();
-    return res.status(200).json({ count });
+    return res.ok("Manager count retrieved successfully", { count });
   },
 );

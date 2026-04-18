@@ -18,7 +18,7 @@ export const createPlayer = catchAsync(async (req: Request, res: Response) => {
 
   const player = await createPlayerService(data);
 
-  return res.status(201).json({ team: player });
+  return res.created("Player created successfully", { player });
 });
 
 export const getPlayerByName = catchAsync(
@@ -33,7 +33,7 @@ export const getPlayerByName = catchAsync(
       l_name: l_name as string,
     });
 
-    return res.status(200).json({ players });
+    return res.ok("Players retrieved successfully", { players });
   },
 );
 
@@ -46,7 +46,7 @@ export const getPlayerByTeam = catchAsync(
 
     const players = await getPlayerByTeamService(team_id as string);
 
-    return res.status(200).json({ players });
+    return res.ok("Players retrieved successfully", { players });
   },
 );
 
@@ -59,7 +59,7 @@ export const getPlayerByPosition = catchAsync(
 
     const players = await getPlayerByPositionService(position as Positions);
 
-    return res.status(200).json({ players });
+    return res.ok("Players retrieved successfully", { players });
   },
 );
 
@@ -72,7 +72,7 @@ export const getPlayerByNationality = catchAsync(
 
     const players = await getPlayerByNationalityService(nationality as string);
 
-    return res.status(200).json({ players });
+    return res.ok("Players retrieved successfully", { players });
   },
 );
 
@@ -83,20 +83,20 @@ export const updatePlayer = catchAsync(async (req: Request, res: Response) => {
 
   const player = await updatePlayerService(id as string, data);
 
-  return res.status(200).json({ player });
+  return res.ok("Player updated successfully", { player });
 });
 
 export const deletePlayer = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!id) throw new BadRequestError("Bad request! ID is required");
 
-  const player = await deletePlayerService(id as string);
+  await deletePlayerService(id as string);
 
-  return res.status(200).json({ player });
+  return res.ok("Player deleted successfully");
 });
 
 export const countPlayers = catchAsync(async (_req: Request, res: Response) => {
   const count = await countPlayerService();
 
-  return res.status(200).json({ count });
+  return res.ok("Player count retrieved successfully", { count });
 });

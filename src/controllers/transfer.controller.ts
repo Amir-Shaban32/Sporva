@@ -10,7 +10,7 @@ import {
 export const createTransfer = catchAsync(
   async (req: Request, res: Response) => {
     const transfer = await createTransferService(req.body);
-    return res.status(201).json({ transfer });
+    return res.created("Transfer created successfully", { transfer });
   },
 );
 
@@ -22,7 +22,7 @@ export const getTransfersByPlayer = catchAsync(
     }
 
     const transfers = await getTransfersByPlayerService(player_id as string);
-    return res.status(200).json({ transfers });
+    return res.ok("Transfers retrieved successfully", { transfers });
   },
 );
 
@@ -34,6 +34,6 @@ export const getTransfersByTeam = catchAsync(
     }
 
     const transfers = await getTransfersByTeamService(team_id as string);
-    return res.status(200).json({ transfers });
+    return res.ok("Transfers retrieved successfully", { transfers });
   },
 );

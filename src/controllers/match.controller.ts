@@ -18,7 +18,7 @@ import { Match_status, Competitions } from "../../generated/prisma";
 
 export const scheduleMatch = catchAsync(async (req: Request, res: Response) => {
   const match = await scheduleMatchService(req.body);
-  return res.status(201).json({ match });
+  return res.created("Match scheduled successfully", { match });
 });
 
 export const getMatchByTeam = catchAsync(
@@ -29,14 +29,14 @@ export const getMatchByTeam = catchAsync(
     }
 
     const matches = await getMatchByTeamService(team_id as string);
-    return res.status(200).json({ matches });
+    return res.ok("Matches retrieved successfully", { matches });
   },
 );
 
 export const getLiveMatches = catchAsync(
   async (_req: Request, res: Response) => {
     const matches = await getLiveMatchesService();
-    return res.status(200).json({ matches });
+    return res.ok("Live matches retrieved successfully", { matches });
   },
 );
 
@@ -48,7 +48,7 @@ export const getMatchesByStatus = catchAsync(
     }
 
     const matches = await getMatchesByStatusService(status as Match_status);
-    return res.status(200).json({ matches });
+    return res.ok("Matches retrieved successfully", { matches });
   },
 );
 
@@ -62,7 +62,7 @@ export const getMatchesByCompetition = catchAsync(
     const matches = await getMatchesByCompetitionService(
       competition as Competitions,
     );
-    return res.status(200).json({ matches });
+    return res.ok("Matches retrieved successfully", { matches });
   },
 );
 
@@ -74,7 +74,7 @@ export const getMatchesBySeasonEndpoint = catchAsync(
     }
 
     const matches = await getMatchesBySeason(season as string);
-    return res.status(200).json({ matches });
+    return res.ok("Matches retrieved successfully", { matches });
   },
 );
 
@@ -86,7 +86,7 @@ export const getMatchesByDate = catchAsync(
     }
 
     const matches = await getMatchesByDateService(new Date(date as string));
-    return res.status(200).json({ matches });
+    return res.ok("Matches retrieved successfully", { matches });
   },
 );
 
@@ -98,21 +98,23 @@ export const getMatchesByRound = catchAsync(
     }
 
     const matches = await getMatchesByRoundService(parseInt(round as string));
-    return res.status(200).json({ matches });
+    return res.ok("Matches retrieved successfully", { matches });
   },
 );
 
 export const getMatchesWithExtraTime = catchAsync(
   async (_req: Request, res: Response) => {
     const matches = await getMatchesWithExtraTimeService();
-    return res.status(200).json({ matches });
+    return res.ok("Matches with extra time retrieved successfully", {
+      matches,
+    });
   },
 );
 
 export const getMatchesWithPenalties = catchAsync(
   async (_req: Request, res: Response) => {
     const matches = await getMatchesWithPenaltiesService();
-    return res.status(200).json({ matches });
+    return res.ok("Matches with penalties retrieved successfully", { matches });
   },
 );
 
@@ -121,5 +123,5 @@ export const updateMatch = catchAsync(async (req: Request, res: Response) => {
   if (!id) throw new BadRequestError("Bad request! ID is required");
 
   const match = await updateMatchService(id as string, req.body);
-  return res.status(200).json({ match });
+  return res.ok("Match updated successfully", { match });
 });

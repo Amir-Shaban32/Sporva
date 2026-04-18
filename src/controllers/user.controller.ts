@@ -15,7 +15,7 @@ import {
 export const createUser = catchAsync(async (req: Request, res: Response) => {
   const data = req.body;
   const user = await createUserService(data);
-  return res.status(201).json({ user });
+  return res.created("User created successfully", { user });
 });
 
 export const getUserById = catchAsync(async (req: Request, res: Response) => {
@@ -25,7 +25,7 @@ export const getUserById = catchAsync(async (req: Request, res: Response) => {
   }
 
   const user = await getUserByIdService(id as string);
-  return res.status(200).json({ user });
+  return res.ok("User retrieved successfully", { user });
 });
 
 export const getUserByUsername = catchAsync(
@@ -36,7 +36,7 @@ export const getUserByUsername = catchAsync(
     }
 
     const user = await getUserByUsernameService(username as string);
-    return res.status(200).json({ user });
+    return res.ok("User retrieved successfully", { user });
   },
 );
 
@@ -48,7 +48,7 @@ export const getUserByEmail = catchAsync(
     }
 
     const user = await getUserByEmailService(email as string);
-    return res.status(200).json({ user });
+    return res.ok("User retrieved successfully", { user });
   },
 );
 
@@ -57,7 +57,7 @@ export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
 
   const users = await getAllUsersService(page, limit);
-  return res.status(200).json({ users });
+  return res.ok("Users retrieved successfully", { users });
 });
 
 export const updateUser = catchAsync(async (req: Request, res: Response) => {
@@ -66,7 +66,7 @@ export const updateUser = catchAsync(async (req: Request, res: Response) => {
   if (!id) throw new BadRequestError("Bad request! ID is required");
 
   const user = await updateUserService(id as string, data);
-  return res.status(200).json({ user });
+  return res.ok("User updated successfully", { user });
 });
 
 export const deleteUser = catchAsync(async (req: Request, res: Response) => {
@@ -76,10 +76,10 @@ export const deleteUser = catchAsync(async (req: Request, res: Response) => {
   }
 
   await deleteUserService(id as string);
-  return res.status(200).json({ message: "User deleted successfully" });
+  return res.ok("User deleted successfully");
 });
 
 export const countUsers = catchAsync(async (_req: Request, res: Response) => {
   const count = await countUsersService();
-  return res.status(200).json({ count });
+  return res.ok("User count retrieved successfully", { count });
 });

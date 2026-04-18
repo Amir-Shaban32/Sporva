@@ -13,7 +13,7 @@ import { Event_types } from "../../generated/prisma";
 export const createMatchEvent = catchAsync(
   async (req: Request, res: Response) => {
     const event = await createMatchEventService(req.body);
-    return res.status(201).json({ event });
+    return res.created("Match event created successfully", { event });
   },
 );
 
@@ -25,7 +25,7 @@ export const getMatchEventsByMatch = catchAsync(
     }
 
     const events = await getMatchEventsByMatchService(match_id as string);
-    return res.status(200).json({ events });
+    return res.ok("Match events retrieved successfully", { events });
   },
 );
 
@@ -37,7 +37,7 @@ export const getMatchEventsByType = catchAsync(
     }
 
     const events = await getMatchEventsByTypeService(event_type as Event_types);
-    return res.status(200).json({ events });
+    return res.ok("Match events retrieved successfully", { events });
   },
 );
 
@@ -49,7 +49,7 @@ export const getMatchEventsByPlayer = catchAsync(
     }
 
     const events = await getMatchEventsByPlayerService(player_id as string);
-    return res.status(200).json({ events });
+    return res.ok("Match events retrieved successfully", { events });
   },
 );
 
@@ -61,8 +61,6 @@ export const deleteMatchEvent = catchAsync(
     }
 
     await deleteMatchEventService(id as string);
-    return res
-      .status(200)
-      .json({ message: "Match event deleted successfully" });
+    return res.ok("Match event deleted successfully");
   },
 );

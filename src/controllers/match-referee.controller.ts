@@ -11,7 +11,9 @@ import { Referee_role } from "../../generated/prisma";
 export const assignRefereeToMatch = catchAsync(
   async (req: Request, res: Response) => {
     const assignment = await assignRefereeToMatchService(req.body);
-    return res.status(201).json({ assignment });
+    return res.created("Referee assigned to match successfully", {
+      assignment,
+    });
   },
 );
 
@@ -23,7 +25,7 @@ export const getMatchByReferee = catchAsync(
     }
 
     const assignments = await getMatchesByRefereeService(referee_id as string);
-    return res.status(200).json({ assignments });
+    return res.ok("Matches retrieved successfully", { assignments });
   },
 );
 
@@ -36,8 +38,6 @@ export const unAssignRefereeFromMatch = catchAsync(
       referee_id: referee_id as string,
       role: role as Referee_role,
     });
-    return res
-      .status(200)
-      .json({ message: "Referee unassigned from match successfully" });
+    return res.ok("Referee unassigned from match successfully");
   },
 );
