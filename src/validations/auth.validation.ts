@@ -9,7 +9,7 @@ const passwordValidation = z
   .regex(/\d/, "Must contain a number")
   .regex(/[@$!%*?&]/, "Must contain a special character (@$!%*?&)");
 
-const baseUserSchema = z.object({
+const baseUserSchema = z.strictObject({
   username: z.string().min(2),
   email: z.email(),
   password: passwordValidation,
@@ -25,7 +25,7 @@ export const registerValidation = baseUserSchema.refine(
   },
 );
 
-export const loginValidation = z.object({
+export const loginValidation = z.strictObject({
   username: z.string().min(2, "Username must be at least 2 characters"),
   password: passwordValidation,
 });

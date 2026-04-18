@@ -9,7 +9,7 @@ const passwordValidation = z
   .regex(/\d/, "Must contain a number")
   .regex(/[@$!%*?&]/, "Must contain a special character (@$!%*?&)");
 
-export const createUserValidation = z.object({
+export const createUserValidation = z.strictObject({
   username: z.string().min(2),
   email: z.email(),
   password: passwordValidation,

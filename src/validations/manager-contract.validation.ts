@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createManagerContractValidation = z.object({
+export const createManagerContractValidation = z.strictObject({
   manager_id: z.cuid(),
   team_id: z.cuid(),
   start_date: z.coerce.date(),

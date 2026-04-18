@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Competitions, Match_status } from "../../generated/prisma";
 
-export const createMatchValidation = z.object({
+export const createMatchValidation = z.strictObject({
   season: z
     .string()
     .regex(/^\d{4}-\d{4}$/, "Season must be in format YYYY-YYYY")

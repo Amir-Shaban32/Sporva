@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Event_types } from "../../generated/prisma";
 
-export const createMatchEventValidation = z.object({
+export const createMatchEventValidation = z.strictObject({
   match_id: z.cuid(),
   player_id: z.cuid(),
   team_id: z.cuid(),

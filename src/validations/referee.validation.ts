@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createRefereeValidation = z.object({
+export const createRefereeValidation = z.strictObject({
   first_name: z.string().min(2).optional().nullable(),
   last_name: z.string().min(2),
   birth_date: z.coerce.date(),

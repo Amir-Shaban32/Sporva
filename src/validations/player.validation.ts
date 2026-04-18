@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Positions, Foot_preference } from "../../generated/prisma";
 
-export const createPlayerValidation = z.object({
+export const createPlayerValidation = z.strictObject({
   first_name: z.string().min(2).optional().nullable(),
   last_name: z.string().min(2),
   birth_date: z.coerce.date(),

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createTeamValidation = z.object({
+export const createTeamValidation = z.strictObject({
   name: z.string().min(4),
   founded_year: z.number().int().min(1857).max(new Date().getFullYear()),
   city: z.string().min(2),

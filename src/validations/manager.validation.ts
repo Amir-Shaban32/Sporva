@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createManagerValidation = z.object({
+export const createManagerValidation = z.strictObject({
   first_name: z.string().min(2).optional().nullable(),
   last_name: z.string().min(2),
   birth_date: z.coerce.date(),

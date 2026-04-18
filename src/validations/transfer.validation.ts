@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Transfer_type } from "../../generated/prisma";
 
-export const createTransferValidation = z.object({
+export const createTransferValidation = z.strictObject({
   player_id: z.cuid(),
   from_team_id: z.cuid(),
   to_team_id: z.cuid(),

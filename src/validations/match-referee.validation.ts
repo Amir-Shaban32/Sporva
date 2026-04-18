@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Referee_role } from "../../generated/prisma";
 
-export const createMatchRefereeValidation = z.object({
+export const createMatchRefereeValidation = z.strictObject({
   match_id: z.cuid(),
   referee_id: z.cuid(),
   role: z.enum([
