@@ -1,4 +1,5 @@
 import express, { Application } from "express";
+import { responseMiddleware } from "./middleware/response.middleware";
 import userRouter from "./routes/user.route";
 import transferRouter from "./routes/transfer.route";
 import teamRouter from "./routes/team.route";
@@ -18,6 +19,7 @@ const app: Application = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(responseMiddleware);
 
 app.use("/api/users", userRouter);
 app.use("/api/transfers", transferRouter);
