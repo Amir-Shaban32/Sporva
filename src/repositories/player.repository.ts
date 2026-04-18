@@ -52,7 +52,7 @@ class PlayerRepository {
   }
 
   async findByJerseyAndTeam(jersey_number: number, team_id: string) {
-    return await prisma.players.findFirstOrThrow({
+    return await prisma.players.findFirst({
       where: { jersey_number, team_id },
     });
   }
