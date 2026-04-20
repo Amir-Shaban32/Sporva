@@ -1,4 +1,4 @@
-import { customRateLimitHandler } from "../middleware/error-handler.middleware";
+import { customRateLimitHandler } from "../handlers/rate-limit.handler";
 import { Request } from "express";
 
 export const globalLimiterConfig = {
