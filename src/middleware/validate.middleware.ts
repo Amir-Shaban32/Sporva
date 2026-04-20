@@ -1,18 +1,19 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
+import { BadRequestError } from "../errors/app-error";
 import { z, ZodType } from "zod";
 
+type requestTarget = "body" | "query" | "params";
+
 export const validate =
-  (schema: ZodType): RequestHandler =>
-  (req: Request, res: Response, next: NextFunction) => {
-    const result = schema.safeParse(req.body);
+  (schema: ZodType, target: requestTarget = "body"): RequestHandler =>
+  (req: Request, _res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req[target]);
 
     if (!result.success) {
-      return res.status(400).json({
-        error: "Validation failed",
-        issues: z.treeifyError(result.error),
-      });
+      const { fieldErrors } = z.flattenError(result.error);
+      return next(new BadRequestError("Validation failed", fieldErrors));
     }
 
-    req.body = result.data;
+    req[target] = result.data;
     return next();
   };

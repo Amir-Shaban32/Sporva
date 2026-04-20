@@ -1,7 +1,8 @@
+// player.validation.ts
 import { z } from "zod";
 import { Positions, Foot_preference } from "../../generated/prisma";
 
-export const createPlayerValidation = z.strictObject({
+const playerBase = z.strictObject({
   first_name: z.string().min(2).optional().nullable(),
   last_name: z.string().min(2),
   birth_date: z.coerce.date(),
@@ -25,12 +26,31 @@ export const createPlayerValidation = z.strictObject({
     .optional(),
   joined_date: z.coerce.date(),
   team_id: z.cuid(),
-  is_retired: z.boolean().optional(),
-  retired_date: z.coerce.date().optional().nullable(),
 });
 
-export const updatePlayerValidation = createPlayerValidation
+const retirementSchema = z.discriminatedUnion("is_retired", [
+  z.strictObject({
+    is_retired: z.literal(false),
+    retired_date: z.null().optional(),
+  }),
+  z.strictObject({
+    is_retired: z.literal(true),
+    retired_date: z.coerce.date().nullable(),
+  }),
+]);
+
+export const createPlayerValidation = playerBase.and(retirementSchema);
+
+export const updatePlayerValidation = playerBase
   .partial()
+  .and(
+    retirementSchema.or(
+      z.strictObject({
+        is_retired: z.undefined(),
+        retired_date: z.undefined(),
+      }),
+    ),
+  )
   .refine((data) => Object.values(data).some((v) => v !== undefined), {
     message: "At least one field must be provided",
   });

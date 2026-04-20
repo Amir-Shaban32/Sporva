@@ -1,17 +1,29 @@
+// transfer.validation.ts
 import { z } from "zod";
 import { Transfer_type } from "../../generated/prisma";
 
-export const createTransferValidation = z.strictObject({
+const transferBase = z.strictObject({
   player_id: z.cuid(),
   from_team_id: z.cuid(),
   to_team_id: z.cuid(),
   transfer_date: z.coerce.date().optional(),
-  transfer_fee: z.number().positive("Transfer fee must be positive"),
-  transfer_type: z.enum([
-    Transfer_type.permanent,
-    Transfer_type.free,
-    Transfer_type.loan,
-  ]),
 });
+
+export const createTransferValidation = transferBase.and(
+  z.discriminatedUnion("transfer_type", [
+    z.strictObject({
+      transfer_type: z.literal(Transfer_type.free),
+      transfer_fee: z.literal(0),
+    }),
+    z.strictObject({
+      transfer_type: z.literal(Transfer_type.permanent),
+      transfer_fee: z.number().positive(),
+    }),
+    z.strictObject({
+      transfer_type: z.literal(Transfer_type.loan),
+      transfer_fee: z.number().min(0),
+    }),
+  ]),
+);
 
 export type CreateTransferInput = z.infer<typeof createTransferValidation>;
