@@ -28,6 +28,4 @@ router.post(
   handleRegister,
 );
 
-router.post("/refresh", handleRefreshToken);
-
 export default router;

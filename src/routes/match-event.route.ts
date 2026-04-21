@@ -15,9 +15,9 @@ import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
 
 const router: Router = Router();
 
-router.get("/:matchId", getMatchEventsByMatch);
 router.get("/", getMatchEventsByType);
 router.get("/playerId", getMatchEventsByPlayer);
+router.get("/:matchId", getMatchEventsByMatch);
 router.post(
   "/",
   sensitiveWriteLimiter,

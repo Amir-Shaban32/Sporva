@@ -6,6 +6,7 @@ import {
 } from "../validations/team.validation";
 import {
   createTeam,
+  getAllTeams,
   getTeamById,
   getTeamByCity,
   getTeamByName,
@@ -14,12 +15,15 @@ import {
   countTeams,
 } from "../controllers";
 import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
+import { paginationValidation } from "../validations/pagination.validation";
 
 const router: Router = Router();
 
-router.get("/:id", getTeamById);
+router.get("/", validate(paginationValidation, "query"), getAllTeams);
 router.get("/city", getTeamByCity);
 router.get("/name", getTeamByName);
+router.get("/count", countTeams);
+router.get("/:id", getTeamById);
 router.post(
   "/",
   sensitiveWriteLimiter,
@@ -33,6 +37,5 @@ router.patch(
   updateTeam,
 );
 router.delete("/:id", sensitiveWriteLimiter, deleteTeam);
-router.get("/count", countTeams);
 
 export default router;

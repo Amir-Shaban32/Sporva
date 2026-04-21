@@ -15,13 +15,15 @@ import {
   countUsers,
 } from "../controllers";
 import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
+import { paginationValidation } from "../validations/pagination.validation";
 
 const router: Router = Router();
 
-router.get("/", getAllUsers);
-router.get("/:id", getUserById);
+router.get("/", validate(paginationValidation, "query"), getAllUsers);
 router.get("/username", getUserByUsername);
 router.get("/email", getUserByEmail);
+router.get("/count", countUsers);
+router.get("/:id", getUserById);
 router.post(
   "/",
   sensitiveWriteLimiter,
@@ -35,6 +37,5 @@ router.patch(
   updateUser,
 );
 router.delete("/:id", sensitiveWriteLimiter, deleteUser);
-router.get("/count", countUsers);
 
 export default router;

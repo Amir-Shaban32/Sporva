@@ -11,15 +11,20 @@ import {
   getPlayerContractsByPlayer,
   deActivatePlayerContract,
   getPlayerContractsByInterval,
+  getAllPlayerContracts,
+  countPlayerContracts,
 } from "../controllers";
 import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
+import { paginationValidation } from "../validations/pagination.validation";
 
 const router: Router = Router();
 
+router.get("/", validate(paginationValidation, "query"), getAllPlayerContracts);
 router.get("/active", getActivePlayerContracts);
-router.get("expired", getExpiredPlayerContracts);
-router.get("/:playerId", getPlayerContractsByPlayer);
+router.get("/expired", getExpiredPlayerContracts);
 router.get("/interval", getPlayerContractsByInterval);
+router.get("/count", countPlayerContracts);
+router.get("/:playerId", getPlayerContractsByPlayer);
 router.post(
   "/",
   sensitiveWriteLimiter,

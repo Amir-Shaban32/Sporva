@@ -11,15 +11,24 @@ import {
   getManagerContractsByManager,
   getManagerContractsByInterval,
   deActivateManagerContract,
+  getAllManagerContracts,
+  countManagerContracts,
 } from "../controllers";
 import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
+import { paginationValidation } from "../validations/pagination.validation";
 
 const router: Router = Router();
 
+router.get(
+  "/",
+  validate(paginationValidation, "query"),
+  getAllManagerContracts,
+);
 router.get("/active", getActiveManagerContracts);
 router.get("/expired", getExpiredManagerContracts);
-router.get("/:managerId", getManagerContractsByManager);
 router.get("/interval", getManagerContractsByInterval);
+router.get("/count", countManagerContracts);
+router.get("/:managerId", getManagerContractsByManager);
 router.post(
   "/",
   sensitiveWriteLimiter,
