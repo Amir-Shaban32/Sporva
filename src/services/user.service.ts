@@ -1,7 +1,11 @@
 import { userRepository } from "../repositories";
 import { IUser, ICreateUser } from "../types";
 import { Prisma } from "../../generated/prisma";
-import { ConflictError, NotFoundError } from "../errors/app-error";
+import {
+  ConflictError,
+  NotFoundError,
+  BadRequestError,
+} from "../errors/app-error";
 
 export const createUserService = async (data: ICreateUser): Promise<IUser> => {
   const existing = await userRepository.findByUsername(data.username);
@@ -47,12 +51,20 @@ export const getUserByEmailService = async (email: string): Promise<IUser> => {
 export const getAllUsersService = async (
   page: number = 1,
   limit: number = 10,
-): Promise<IUser[]> => {
+): Promise<{ users: IUser[]; total: number }> => {
+  const total = await userRepository.count();
+
+  if (total > 0 && page > Math.ceil(total / limit)) {
+    throw new BadRequestError(
+      `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
+    );
+  }
+
   const users = await userRepository.findAll(page, limit);
   if (!users.length) {
     throw new NotFoundError("No users found");
   }
-  return users;
+  return { users, total };
 };
 
 export const updateUserService = async (

@@ -2,7 +2,11 @@ import { Positions } from "../../generated/prisma";
 import { playerRepository } from "../repositories";
 import { PlayerSearchInput, IPlayer, ICreatePlayer } from "../types";
 import { Prisma } from "../../generated/prisma";
-import { ConflictError, NotFoundError } from "../errors/app-error";
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from "../errors/app-error";
 
 export const createPlayerService = async (
   data: ICreatePlayer,
@@ -18,6 +22,25 @@ export const createPlayerService = async (
   return player;
 };
 
+export const getAllPlayersService = async (
+  page: number = 1,
+  limit: number = 10,
+): Promise<{ players: IPlayer[]; total: number }> => {
+  const total = await playerRepository.count();
+
+  if (total > 0 && page > Math.ceil(total / limit)) {
+    throw new BadRequestError(
+      `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
+    );
+  }
+
+  const players = await playerRepository.findAll(page, limit);
+  if (!players.length) {
+    throw new NotFoundError("No Players found!");
+  }
+  return { players, total };
+};
+
 export const getPlayerByNameService = async (
   name: PlayerSearchInput,
 ): Promise<IPlayer[]> => {
@@ -26,6 +49,14 @@ export const getPlayerByNameService = async (
     throw new NotFoundError("No players found");
   }
   return players;
+};
+
+export const getPlayerByIdService = async (id: string): Promise<IPlayer> => {
+  const player = await playerRepository.findById(id);
+  if (!player) {
+    throw new NotFoundError("Player not found");
+  }
+  return player;
 };
 
 export const getPlayerByTeamService = async (
@@ -72,14 +103,13 @@ export const updatePlayerService = async (
   return player;
 };
 
-export const deletePlayerService = async (id: string): Promise<IPlayer> => {
+export const deletePlayerService = async (id: string): Promise<void> => {
   const existing = await playerRepository.findById(id);
 
   if (!existing) {
     throw new NotFoundError("Player not found");
   }
-  const player = await playerRepository.delete(id);
-  return player;
+  await playerRepository.delete(id);
 };
 
 export const countPlayerService = async (): Promise<number> => {

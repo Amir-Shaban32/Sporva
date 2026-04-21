@@ -2,6 +2,7 @@ import { managerRepository } from "../repositories";
 import { ManagerSearchInput, IManager, ICreateManager } from "../types";
 import { Prisma } from "../../generated/prisma";
 import { ConflictError, NotFoundError } from "../errors/app-error";
+import { BadRequestError } from "../errors/app-error";
 
 export const createManagerService = async (
   data: ICreateManager,
@@ -15,6 +16,32 @@ export const createManagerService = async (
     throw new ConflictError("Manager already exists");
   }
   const manager = await managerRepository.create(data);
+  return manager;
+};
+
+export const getAllManagersService = async (
+  page: number = 1,
+  limit: number = 10,
+): Promise<{ managers: IManager[]; total: number }> => {
+  const total = await managerRepository.count();
+
+  if (total > 0 && page > Math.ceil(total / limit)) {
+    throw new BadRequestError(
+      `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
+    );
+  }
+  const managers = await managerRepository.findAll(page, limit);
+  if (!managers.length) {
+    throw new NotFoundError("No Managers found!");
+  }
+  return { managers, total };
+};
+
+export const getManagerByIdService = async (id: string): Promise<IManager> => {
+  const manager = await managerRepository.findById(id);
+  if (!manager) {
+    throw new NotFoundError("Manager not found");
+  }
   return manager;
 };
 

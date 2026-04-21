@@ -1,12 +1,44 @@
-import { playerContractRepository } from "../repositories";
+import {
+  playerContractRepository,
+  playerRepository,
+  teamRepository,
+} from "../repositories";
 import { IPlayerContract, ICreatePlayerContract } from "../types";
 import { NotFoundError } from "../errors/app-error";
+import { BadRequestError } from "../errors/app-error";
 
 export const createPlayerContractService = async (
   data: ICreatePlayerContract,
 ): Promise<IPlayerContract> => {
+  const player = await playerRepository.findById(data.player_id);
+  if (!player) {
+    throw new NotFoundError("Player not found");
+  }
+  const team = await teamRepository.findById(data.team_id);
+  if (!team) {
+    throw new NotFoundError("Team not found");
+  }
   const contract = await playerContractRepository.create(data);
   return contract;
+};
+
+export const getAllPlayerContractsService = async (
+  page: number = 1,
+  limit: number = 10,
+): Promise<{ playerContracts: IPlayerContract[]; total: number }> => {
+  const total = await playerContractRepository.count();
+
+  if (total > 0 && page > Math.ceil(total / limit)) {
+    throw new BadRequestError(
+      `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
+    );
+  }
+
+  const playerContracts = await playerContractRepository.findAll(page, limit);
+  if (!playerContracts.length) {
+    throw new NotFoundError("No Player Contracts found!");
+  }
+  return { playerContracts, total };
 };
 
 export const getActivePlayerContractsService = async (): Promise<
@@ -32,6 +64,10 @@ export const getExpiredPlayerContractsService = async (): Promise<
 export const getPlayerContractsByPlayerService = async (
   player_id: string,
 ): Promise<IPlayerContract[]> => {
+  const player = await playerRepository.findById(player_id);
+  if (!player) {
+    throw new NotFoundError("Player not found");
+  }
   const contracts = await playerContractRepository.findByPlayer(player_id);
   if (!contracts.length) {
     throw new NotFoundError("No contracts found");
@@ -54,4 +90,9 @@ export const getPlayerContractsByIntervalService = async (
     throw new NotFoundError("No contracts found");
   }
   return contracts as IPlayerContract[];
+};
+
+export const countPlayerContractsService = async (): Promise<number> => {
+  const contracts = await playerContractRepository.count();
+  return contracts;
 };

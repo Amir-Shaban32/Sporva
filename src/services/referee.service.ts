@@ -2,6 +2,7 @@ import { IReferee, ICreateReferee, RefereeSearchInput } from "../types";
 import { refereeRepository } from "../repositories";
 import { Prisma } from "../../generated/prisma";
 import { ConflictError, NotFoundError } from "../errors/app-error";
+import { BadRequestError } from "../errors/app-error";
 
 export const createRefereeService = async (
   data: ICreateReferee,
@@ -16,6 +17,25 @@ export const createRefereeService = async (
   }
   const referee = await refereeRepository.create(data);
   return referee;
+};
+
+export const getAllRefereesService = async (
+  page: number = 1,
+  limit: number = 10,
+): Promise<{ referees: IReferee[]; total: number }> => {
+  const total = await refereeRepository.count();
+
+  if (total > 0 && page > Math.ceil(total / limit)) {
+    throw new BadRequestError(
+      `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
+    );
+  }
+
+  const referees = await refereeRepository.findAll(page, limit);
+  if (!referees.length) {
+    throw new NotFoundError("No Referees found!");
+  }
+  return { referees, total };
 };
 
 export const getRefereeByIdService = async (id: string): Promise<IReferee> => {

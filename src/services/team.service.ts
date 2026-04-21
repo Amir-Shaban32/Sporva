@@ -2,6 +2,7 @@ import { teamRepository } from "../repositories";
 import { Prisma } from "../../generated/prisma";
 import { ITeam, ICreateTeam } from "../types";
 import { ConflictError, NotFoundError } from "../errors/app-error";
+import { BadRequestError } from "../errors/app-error";
 
 export const createTeamService = async (data: ICreateTeam): Promise<ITeam> => {
   const existing = await teamRepository.findByName(data.name);
@@ -10,6 +11,25 @@ export const createTeamService = async (data: ICreateTeam): Promise<ITeam> => {
   }
   const team = await teamRepository.create(data);
   return team;
+};
+
+export const getAllTeamsService = async (
+  page: number = 1,
+  limit: number = 10,
+): Promise<{ teams: ITeam[]; total: number }> => {
+  const total = await teamRepository.count();
+
+  if (total > 0 && page > Math.ceil(total / limit)) {
+    throw new BadRequestError(
+      `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
+    );
+  }
+
+  const teams = await teamRepository.findAll(page, limit);
+  if (!teams.length) {
+    throw new NotFoundError("No Teams found!");
+  }
+  return { teams, total };
 };
 
 export const getTeamByIdService = async (id: string): Promise<ITeam> => {
@@ -28,9 +48,7 @@ export const getTeamByNameService = async (name: string): Promise<ITeam> => {
   return existing;
 };
 
-export const getRefereeByCityService = async (
-  city: string,
-): Promise<ITeam[]> => {
+export const getTeamByCityService = async (city: string): Promise<ITeam[]> => {
   const teams = await teamRepository.findByCity(city);
   if (!teams.length) {
     throw new NotFoundError("No Teams found");
@@ -40,7 +58,7 @@ export const getRefereeByCityService = async (
 
 export const updateTeamService = async (
   id: string,
-  data: Prisma.RefereesUpdateInput,
+  data: Prisma.TeamsUpdateInput,
 ): Promise<ITeam> => {
   const existing = await teamRepository.findById(id);
 
