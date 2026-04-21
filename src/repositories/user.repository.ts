@@ -36,6 +36,10 @@ class UserRepository {
     });
   }
 
+  async findAdmin() {
+    return await prisma.user.findMany({ where: { role: User_Role.ADMIN } });
+  }
+
   async findByUsername(username: string) {
     return await prisma.user.findUnique({
       where: { username },

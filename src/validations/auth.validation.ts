@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { User_Role } from "../../generated/prisma";
 
 const passwordValidation = z
   .string()
@@ -14,7 +13,6 @@ const baseUserSchema = z.strictObject({
   email: z.email(),
   password: passwordValidation,
   confirmPassword: z.string(),
-  role: z.enum([User_Role.ADMIN, User_Role.USER]).optional(),
 });
 
 export const registerValidation = baseUserSchema.refine(
