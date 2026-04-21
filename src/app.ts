@@ -14,12 +14,14 @@ import managerContractRouter from "./routes/manager-contract.route";
 import leagueStandingsRouter from "./routes/league-standing.route";
 import authRouter from "./routes/auth/auth.route";
 import { errorHandler } from "./middleware/error-handler.middleware";
+import cookieParser from "cookie-parser";
 
 const app: Application = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(responseMiddleware);
+app.use(cookieParser());
 
 app.use("/api/users", userRouter);
 app.use("/api/transfers", transferRouter);
