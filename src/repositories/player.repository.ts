@@ -27,6 +27,14 @@ class PlayerRepository {
     });
   }
 
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    return await prisma.players.findMany({
+      skip,
+      take: limit,
+    });
+  }
+
   async findByName(name: PlayerSearchInput) {
     return await prisma.players.findMany({
       where: { first_name: name.f_name, last_name: name.l_name },
@@ -57,7 +65,7 @@ class PlayerRepository {
     });
   }
 
-  async update(id: string, data: Prisma.UserUpdateInput) {
+  async update(id: string, data: Prisma.PlayersUpdateInput) {
     return await prisma.players.update({
       where: { id },
       data,

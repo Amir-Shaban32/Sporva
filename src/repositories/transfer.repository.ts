@@ -15,19 +15,31 @@ class TransferRepository {
     });
   }
 
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    return await prisma.transfers.findMany({
+      skip,
+      take: limit,
+    });
+  }
+
   async findByPlayer(player_id: string) {
     return await prisma.transfers.findMany({
       where: { player_id },
     });
   }
 
-  async findByteam(team_id: string) {
+  async findByTeam(team_id: string) {
     return await prisma.transfers.findMany({
       where: {
         OR: [{ from_team_id: team_id }, { to_team_id: team_id }],
       },
     });
   }
+
+  async count() {
+    return await prisma.transfers.count();
+  }
 }
 
-export const transferREpository = new TransferRepository();
+export const transferRepository = new TransferRepository();

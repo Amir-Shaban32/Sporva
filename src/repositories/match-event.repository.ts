@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma";
 import { Event_types } from "../../generated/prisma";
-import { ICreateMatchEvent } from "../types";
+import { ICreateMatchEvent, IMatch } from "../types";
 
 class MatchEventRepository {
   async create(data: ICreateMatchEvent) {
@@ -12,6 +12,46 @@ class MatchEventRepository {
         event_type: data.event_type,
         minute: data.minute,
       },
+    });
+  }
+
+  async createWithMatchUpdate(data: ICreateMatchEvent, match: IMatch) {
+    return await prisma.$transaction(async (prisma) => {
+      const event = await prisma.match_Events.create({ data });
+
+      if (data.event_type === "GOAL" || data.event_type === "SCORE_PENALTY") {
+        await prisma.matches.update({
+          where: { id: data.match_id },
+          data: {
+            host_team_score:
+              data.team_id === match.host_team_id
+                ? { increment: 1 }
+                : undefined,
+            guest_team_score:
+              data.team_id === match.guest_team_id
+                ? { increment: 1 }
+                : undefined,
+          },
+        });
+      }
+
+      if (data.event_type === "OWN_GOAL") {
+        await prisma.matches.update({
+          where: { id: data.match_id },
+          data: {
+            host_team_score:
+              data.team_id === match.guest_team_id
+                ? { increment: 1 }
+                : undefined,
+            guest_team_score:
+              data.team_id === match.host_team_id
+                ? { increment: 1 }
+                : undefined,
+          },
+        });
+      }
+
+      return event;
     });
   }
 

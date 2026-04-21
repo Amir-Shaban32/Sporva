@@ -15,6 +15,14 @@ class ManagerContractRepository {
     });
   }
 
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    return await prisma.manager_Contracts.findMany({
+      skip,
+      take: limit,
+    });
+  }
+
   async findByManager(manager_id: string) {
     return await prisma.manager_Contracts.findMany({
       where: { manager_id },
@@ -48,6 +56,10 @@ class ManagerContractRepository {
         is_active: false,
       },
     });
+  }
+
+  async count() {
+    return await prisma.manager_Contracts.count();
   }
 }
 

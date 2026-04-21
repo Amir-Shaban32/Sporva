@@ -1,3 +1,4 @@
+import { InputJsonValue } from "generated/prisma/runtime/client";
 import { prisma } from "../../lib/prisma";
 import { ICreateRefreshToken } from "../../types";
 
@@ -9,7 +10,7 @@ class RefreshTokenRepository {
         token: data.token,
         expires_at: data.expires_at,
         last_used: data.last_used,
-        device_info: data.device_info,
+        device_info: data.device_info as unknown as InputJsonValue,
         is_revoked: data.is_revoked,
       },
     });

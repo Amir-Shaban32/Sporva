@@ -21,6 +21,14 @@ class TeamRepository {
     });
   }
 
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    return await prisma.teams.findMany({
+      skip,
+      take: limit,
+    });
+  }
+
   async findByName(name: string) {
     return await prisma.teams.findUnique({
       where: { name },
@@ -33,7 +41,7 @@ class TeamRepository {
     });
   }
 
-  async update(id: string, data: Prisma.UserUpdateInput) {
+  async update(id: string, data: Prisma.TeamsUpdateInput) {
     return await prisma.teams.update({
       where: { id },
       data,

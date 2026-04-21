@@ -4,7 +4,7 @@ export { refereeRepository } from "./referee.repository";
 export { teamRepository } from "./team.repository";
 export { playerRepository } from "./player.repository";
 export { matchRepository } from "./match.repository";
-export { transferREpository } from "./transfer.repository";
+export { transferRepository } from "./transfer.repository";
 export { playerContractRepository } from "./player-contract.repository";
 export { managerContractRepository } from "./manager-contract.repository";
 export { matchEventRepository } from "./match-event.repository";

@@ -22,6 +22,14 @@ export class ManagerRepository {
     });
   }
 
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    return await prisma.managers.findMany({
+      skip,
+      take: limit,
+    });
+  }
+
   async findById(id: string) {
     return await prisma.managers.findUnique({
       where: { id },

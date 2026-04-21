@@ -34,6 +34,12 @@ class MatchRepository {
     });
   }
 
+  async findById(id: string) {
+    return await prisma.matches.findUnique({
+      where: { id },
+    });
+  }
+
   async findLive() {
     return await prisma.matches.findMany({
       where: { status: "LIVE" },
