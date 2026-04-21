@@ -1,5 +1,5 @@
 import { refreshTokenRepository } from "../../repositories";
-import { NotFoundError, ServerError } from "../../errors/app-error";
+import { NotFoundError } from "../../errors/app-error";
 import {
   ICreateRefreshToken,
   IRefreshToken,
@@ -9,86 +9,51 @@ import {
 export const createTokenService = async (
   data: ICreateRefreshToken,
 ): Promise<IRefreshToken> => {
-  try {
-    const refreshToken = await refreshTokenRepository.createToken(data);
-    return refreshToken;
-  } catch (error) {
-    throw new ServerError("Failed to create refresh token");
-  }
+  const refreshToken = await refreshTokenRepository.createToken(data);
+  return refreshToken;
 };
 
-export const getTokenById = async (id: string): Promise<IRefreshToken> => {
-  try {
-    const refreshToken = await refreshTokenRepository.findTokenById(id);
+export const getTokenByIdService = async (
+  id: string,
+): Promise<IRefreshToken> => {
+  const refreshToken = await refreshTokenRepository.findTokenById(id);
 
-    if (!refreshToken) throw new NotFoundError("Refresh token not found");
-    return refreshToken;
-  } catch (error) {
-    if (error instanceof NotFoundError) throw error;
-    throw new ServerError("Failed to retrieve refresh token");
-  }
+  if (!refreshToken) throw new NotFoundError("Refresh token not found");
+  return refreshToken;
 };
 
-export const getTokenByToken = async (
+export const getTokenByTokenService = async (
   token: string,
 ): Promise<IRefreshToken> => {
-  try {
-    const refreshToken = await refreshTokenRepository.findTokenByToken(token);
+  const refreshToken = await refreshTokenRepository.findTokenByToken(token);
 
-    if (!refreshToken) throw new NotFoundError("Refresh token not found");
-    return refreshToken;
-  } catch (error) {
-    if (error instanceof NotFoundError) throw error;
-    throw new ServerError("Failed to retrieve refresh token");
-  }
+  if (!refreshToken) throw new NotFoundError("Refresh token not found");
+  return refreshToken;
 };
 
 export const getRefreshTokenByUserIdService = async (
   user_id: string,
 ): Promise<IRefreshToken[]> => {
-  try {
-    const refreshToken =
-      await refreshTokenRepository.findTokenByUserId(user_id);
-    if (!refreshToken)
-      throw new NotFoundError("No refresh tokens found for user");
-    return refreshToken;
-  } catch (error) {
-    if (error instanceof NotFoundError) throw error;
-    throw new ServerError("Failed to retrieve refresh tokens");
-  }
+  const refreshToken = await refreshTokenRepository.findTokenByUserId(user_id);
+  if (!refreshToken)
+    throw new NotFoundError("No refresh tokens found for user");
+  return refreshToken;
 };
 
 export const getUserIdByRefreshTokenService = async (
   user_id: string,
 ): Promise<IUserId[]> => {
-  try {
-    const user = await refreshTokenRepository.findUserByToken(user_id);
-    if (!user) throw new NotFoundError("User not found");
-    return user;
-  } catch (error) {
-    if (error instanceof NotFoundError) throw error;
-    throw new ServerError("Failed to retrieve user");
-  }
+  const user = await refreshTokenRepository.findUserByToken(user_id);
+  if (!user) throw new NotFoundError("User not found");
+  return user;
 };
 
 export const revokeAllUserTokensService = async (
   user_id: string,
 ): Promise<void> => {
-  try {
-    await refreshTokenRepository.revoke(user_id);
-  } catch (error) {
-    throw new ServerError("Failed to revoke user tokens");
-  }
+  await refreshTokenRepository.revoke(user_id);
 };
 
-export const deleteTokenService = async (id: string): Promise<string> => {
-  try {
-    const existing = await refreshTokenRepository.findTokenById(id);
-    if (!existing) throw new NotFoundError("Refresh token not found");
-    await refreshTokenRepository.delete(id);
-    return "Refresh token deleted successfully";
-  } catch (error) {
-    if (error instanceof NotFoundError) throw error;
-    throw new ServerError("Failed to delete refresh token");
-  }
+export const deleteTokenService = async (id: string): Promise<void> => {
+  await refreshTokenRepository.delete(id);
 };

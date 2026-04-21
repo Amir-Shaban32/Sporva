@@ -1,18 +1,14 @@
 import { userRepository } from "../../repositories";
 import {
   createTokenService,
-  getTokenByToken,
+  getTokenByTokenService,
   revokeAllUserTokensService,
   deleteTokenService,
 } from "./refresh-token.service";
 import { comparePassword } from "../../utils/password";
 import { generateTokens } from "../../utils/jwt";
 import { LoginInput, LoginResult } from "../../types/auth.type";
-import {
-  NotFoundError,
-  UnauthorizedError,
-  ServerError,
-} from "../../errors/app-error";
+import { NotFoundError, UnauthorizedError } from "../../errors/app-error";
 
 export const loginService = async (input: LoginInput): Promise<LoginResult> => {
   const { username, password, deviceInfo, incomingCookieToken } = input;
@@ -35,20 +31,24 @@ export const loginService = async (input: LoginInput): Promise<LoginResult> => {
 
   if (incomingCookieToken) {
     try {
-      const foundToken = await getTokenByToken(incomingCookieToken);
+      const foundToken = await getTokenByTokenService(incomingCookieToken);
       await deleteTokenService(foundToken.id);
     } catch (error) {
-      // Token not found or error, revoke all user tokens
-      await revokeAllUserTokensService(foundUser.id);
+      if (error instanceof NotFoundError) {
+        // token not in DB — possible reuse attack, revoke all
+        await revokeAllUserTokensService(foundUser.id);
+      } else {
+        throw error;
+      }
     }
   }
 
-  const newToken = await createTokenService({
+  await createTokenService({
     user_id: foundUser.id,
     token: refreshToken,
     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
     last_used: new Date(),
-    device_info: JSON.parse(JSON.stringify(deviceInfo)),
+    device_info: structuredClone(deviceInfo),
   });
 
   return { accessToken, refreshToken };
