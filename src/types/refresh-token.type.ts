@@ -2,6 +2,7 @@ import {
   JsonValue,
   InputJsonValue,
 } from "../../generated/prisma/runtime/client";
+import { DeviceInfo } from "../types";
 
 export interface IRefreshToken {
   id: string;
@@ -19,7 +20,7 @@ export interface ICreateRefreshToken {
   token: string;
   expires_at: Date;
   last_used: Date;
-  device_info: InputJsonValue;
+  device_info: DeviceInfo;
   is_revoked?: boolean;
 }
 

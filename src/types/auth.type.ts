@@ -35,7 +35,7 @@ export interface RefreshTokenInput {
 export interface JWTPayload {
   userInfo: {
     username: string;
-    role: number;
+    role: string;
     id: string;
   };
 }
