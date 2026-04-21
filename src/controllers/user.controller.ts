@@ -11,6 +11,7 @@ import {
   deleteUserService,
   countUsersService,
 } from "../services";
+import { parsePagination } from "src/utils/parse-pagination";
 
 export const createUser = catchAsync(async (req: Request, res: Response) => {
   const data = req.body;
@@ -53,11 +54,16 @@ export const getUserByEmail = catchAsync(
 );
 
 export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const page = req.query.page ? parseInt(req.query.page as string) : 1;
-  const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+  const { page, limit } = parsePagination(req);
 
-  const users = await getAllUsersService(page, limit);
-  return res.ok("Users retrieved successfully", { users });
+  const { users, total } = await getAllUsersService(page, limit);
+  return res.paginated(
+    users,
+    total,
+    page,
+    limit,
+    "Users retrieved successfully",
+  );
 });
 
 export const updateUser = catchAsync(async (req: Request, res: Response) => {

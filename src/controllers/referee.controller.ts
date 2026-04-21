@@ -10,16 +10,34 @@ import {
   updateRefereeService,
   countRefereeService,
   deleteRefereeService,
+  getAllRefereesService,
 } from "../services";
+import { parsePagination } from "../utils/parse-pagination";
 
 export const createReferee = catchAsync(async (req: Request, res: Response) => {
   const referee = await createRefereeService(req.body);
   return res.created("Referee created successfully", { referee });
 });
 
+export const getAllReferees = catchAsync(
+  async (req: Request, res: Response) => {
+    const { page, limit } = parsePagination(req);
+
+    const { referees, total } = await getAllRefereesService(page, limit);
+
+    return res.paginated(
+      referees,
+      total,
+      page,
+      limit,
+      "Referees retrieved successfully",
+    );
+  },
+);
+
 export const getRefereeById = catchAsync(
   async (req: Request, res: Response) => {
-    const { id } = req.query;
+    const { id } = req.params;
     if (!id) {
       throw new BadRequestError("Bad request! ID is required");
     }

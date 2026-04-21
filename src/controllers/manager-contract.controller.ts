@@ -8,12 +8,34 @@ import {
   getManagerContractsByManagerService,
   deActivateManagerContractService,
   getManagerContractsByIntervalService,
+  getAllManagerContractsService,
+  countManagerContractsService,
 } from "../services";
+import { parsePagination } from "../utils/parse-pagination";
 
 export const createManagerContract = catchAsync(
   async (req: Request, res: Response) => {
     const contract = await createManagerContractService(req.body);
     return res.created("Manager contract created successfully", { contract });
+  },
+);
+
+export const getAllManagerContracts = catchAsync(
+  async (req: Request, res: Response) => {
+    const { page, limit } = parsePagination(req);
+
+    const { managerContracts, total } = await getAllManagerContractsService(
+      page,
+      limit,
+    );
+
+    return res.paginated(
+      managerContracts,
+      total,
+      page,
+      limit,
+      "Manager Contracts retrieved successfully",
+    );
   },
 );
 
@@ -72,5 +94,13 @@ export const getManagerContractsByInterval = catchAsync(
       parseInt(period as string),
     );
     return res.ok("Manager contracts retrieved successfully", { contracts });
+  },
+);
+
+export const countManagerContracts = catchAsync(
+  async (_req: Request, res: Response) => {
+    const count = await countManagerContractsService();
+
+    return res.ok("Manager Contracts count retrieved successfully", { count });
   },
 );

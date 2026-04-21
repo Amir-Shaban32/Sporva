@@ -5,15 +5,31 @@ import {
   createTeamService,
   getTeamByIdService,
   getTeamByNameService,
-  getRefereeByCityService,
+  getTeamByCityService,
   updateTeamService,
   countTeamService,
   deleteTeamService,
+  getAllTeamsService,
 } from "../services";
+import { parsePagination } from "../utils/parse-pagination";
 
 export const createTeam = catchAsync(async (req: Request, res: Response) => {
   const team = await createTeamService(req.body);
   return res.created("Team created successfully", { team });
+});
+
+export const getAllTeams = catchAsync(async (req: Request, res: Response) => {
+  const { page, limit } = parsePagination(req);
+
+  const { teams, total } = await getAllTeamsService(page, limit);
+
+  return res.paginated(
+    teams,
+    total,
+    page,
+    limit,
+    "Teams retrieved successfully",
+  );
 });
 
 export const getTeamById = catchAsync(async (req: Request, res: Response) => {
@@ -42,7 +58,7 @@ export const getTeamByCity = catchAsync(async (req: Request, res: Response) => {
     throw new BadRequestError("Bad request! City is required");
   }
 
-  const teams = await getRefereeByCityService(city as string);
+  const teams = await getTeamByCityService(city as string);
   return res.ok("Teams retrieved successfully", { teams });
 });
 

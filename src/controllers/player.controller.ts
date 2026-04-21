@@ -10,7 +10,10 @@ import {
   deletePlayerService,
   countPlayerService,
   createPlayerService,
+  getPlayerByIdService,
+  getAllPlayersService,
 } from "../services";
+import { parsePagination } from "../utils/parse-pagination";
 import { Positions } from "../../generated/prisma";
 
 export const createPlayer = catchAsync(async (req: Request, res: Response) => {
@@ -19,6 +22,20 @@ export const createPlayer = catchAsync(async (req: Request, res: Response) => {
   const player = await createPlayerService(data);
 
   return res.created("Player created successfully", { player });
+});
+
+export const getAllPlayers = catchAsync(async (req: Request, res: Response) => {
+  const { page, limit } = parsePagination(req);
+
+  const { players, total } = await getAllPlayersService(page, limit);
+
+  return res.paginated(
+    players,
+    total,
+    page,
+    limit,
+    "Players retrieved successfully",
+  );
 });
 
 export const getPlayerByName = catchAsync(
@@ -37,14 +54,25 @@ export const getPlayerByName = catchAsync(
   },
 );
 
+export const getPlayerById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (!id) {
+    throw new BadRequestError("Bad request! ID is required");
+  }
+
+  const player = await getPlayerByIdService(id as string);
+
+  return res.ok("Player retrieved successfully", { player });
+});
+
 export const getPlayerByTeam = catchAsync(
   async (req: Request, res: Response) => {
-    const { team_id } = req.params;
-    if (!team_id) {
+    const { teamId } = req.params;
+    if (!teamId) {
       throw new BadRequestError("Bad request! Team ID is required");
     }
 
-    const players = await getPlayerByTeamService(team_id as string);
+    const players = await getPlayerByTeamService(teamId as string);
 
     return res.ok("Players retrieved successfully", { players });
   },

@@ -2,10 +2,13 @@ import { Request, Response } from "express";
 import { catchAsync } from "../utils/catch-async";
 import { BadRequestError } from "../errors/app-error";
 import {
+  countTransfersService,
   createTransferService,
+  getAllTransService,
   getTransfersByPlayerService,
   getTransfersByTeamService,
 } from "../services";
+import { parsePagination } from "../utils/parse-pagination";
 
 export const createTransfer = catchAsync(
   async (req: Request, res: Response) => {
@@ -14,26 +17,47 @@ export const createTransfer = catchAsync(
   },
 );
 
+export const getAllTrans = catchAsync(async (req: Request, res: Response) => {
+  const { page, limit } = parsePagination(req);
+
+  const { transfers, total } = await getAllTransService(page, limit);
+
+  return res.paginated(
+    transfers,
+    total,
+    page,
+    limit,
+    "Transfers retrieved successfully",
+  );
+});
+
 export const getTransfersByPlayer = catchAsync(
   async (req: Request, res: Response) => {
-    const { player_id } = req.params;
-    if (!player_id) {
+    const { playerId } = req.params;
+    if (!playerId) {
       throw new BadRequestError("Bad request! Player ID is required");
     }
 
-    const transfers = await getTransfersByPlayerService(player_id as string);
+    const transfers = await getTransfersByPlayerService(playerId as string);
     return res.ok("Transfers retrieved successfully", { transfers });
   },
 );
 
 export const getTransfersByTeam = catchAsync(
   async (req: Request, res: Response) => {
-    const { team_id } = req.params;
-    if (!team_id) {
+    const { teamId } = req.params;
+    if (!teamId) {
       throw new BadRequestError("Bad request! Team ID is required");
     }
 
-    const transfers = await getTransfersByTeamService(team_id as string);
+    const transfers = await getTransfersByTeamService(teamId as string);
     return res.ok("Transfers retrieved successfully", { transfers });
+  },
+);
+
+export const countTransfers = catchAsync(
+  async (_req: Request, res: Response) => {
+    const transfers = await countTransfersService();
+    return res.ok("Transfers count retrieved successfully", { transfers });
   },
 );

@@ -8,12 +8,34 @@ import {
   getPlayerContractsByPlayerService,
   deActivatePlayerContractService,
   getPlayerContractsByIntervalService,
+  getAllPlayerContractsService,
+  countPlayerContractsService,
 } from "../services";
+import { parsePagination } from "../utils/parse-pagination";
 
 export const createPlayerContract = catchAsync(
   async (req: Request, res: Response) => {
     const contract = await createPlayerContractService(req.body);
     return res.created("Player contract created successfully", { contract });
+  },
+);
+
+export const getAllPlayerContracts = catchAsync(
+  async (req: Request, res: Response) => {
+    const { page, limit } = parsePagination(req);
+
+    const { playerContracts, total } = await getAllPlayerContractsService(
+      page,
+      limit,
+    );
+
+    return res.paginated(
+      playerContracts,
+      total,
+      page,
+      limit,
+      "Player Contracts retrieved successfully",
+    );
   },
 );
 
@@ -72,5 +94,12 @@ export const getPlayerContractsByInterval = catchAsync(
       parseInt(period as string),
     );
     return res.ok("Player contracts retrieved successfully", { contracts });
+  },
+);
+
+export const countPlayerContracts = catchAsync(
+  async (_req: Request, res: Response) => {
+    const count = await countPlayerContractsService();
+    return res.ok("Player Contracts count retrieved successfully", { count });
   },
 );

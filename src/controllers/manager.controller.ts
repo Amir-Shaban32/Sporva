@@ -3,18 +3,47 @@ import { catchAsync } from "../utils/catch-async";
 import { BadRequestError } from "../errors/app-error";
 import {
   createManagerService,
+  getManagerByIdService,
   getManagerByNameService,
   getManagerByNationalityService,
   updateManagerService,
   countManagerService,
   deleteManagerService,
+  getAllManagersService,
 } from "../services";
+import { parsePagination } from "../utils/parse-pagination";
 
 export const createManager = catchAsync(async (req: Request, res: Response) => {
   const data = req.body;
   const manager = await createManagerService(data);
   return res.created("Manager created successfully", { manager });
 });
+
+export const getAllManagers = catchAsync(
+  async (req: Request, res: Response) => {
+    const { page, limit } = parsePagination(req);
+
+    const { managers, total } = await getAllManagersService(page, limit);
+
+    return res.paginated(
+      managers,
+      total,
+      page,
+      limit,
+      "Managers retrieved successfully",
+    );
+  },
+);
+
+export const getManagerById = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    if (!id) throw new BadRequestError("Bad request! ID is required");
+
+    const manager = await getManagerByIdService(id as string);
+    return res.ok("Manager retrieved successfully", { manager });
+  },
+);
 
 export const getManagerByName = catchAsync(
   async (req: Request, res: Response) => {
