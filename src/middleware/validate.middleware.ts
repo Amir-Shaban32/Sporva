@@ -14,6 +14,6 @@ export const validate =
       return next(new BadRequestError("Validation failed", fieldErrors));
     }
 
-    req[target] = result.data;
+    Object.assign(req[target], result.data);
     return next();
   };

@@ -1,5 +1,6 @@
 import { customRateLimitHandler } from "../handlers/rate-limit.handler";
 import { Request } from "express";
+import { ipKeyGenerator } from "express-rate-limit";
 
 export const globalLimiterConfig = {
   windowMs: 15 * 60 * 1000,
@@ -15,7 +16,7 @@ export const authLimiterConfig = {
   skipSuccessfulRequests: false,
   keyGenerator: (req: Request): string => {
     const email = req.body?.email ?? "unknown";
-    return `auth:${req.ip}:${email}`;
+    return `auth:${ipKeyGenerator(req.ip ?? "")}:${email}`;
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -28,7 +29,7 @@ export const refreshTokenLimiterConfig = {
   skipSuccessfulRequests: true,
   keyGenerator: (req: Request): string => {
     const userId = req.body?.user_id ?? "unknown";
-    return `refresh:${req.ip}:${userId}`;
+    return `refresh:${ipKeyGenerator(req.ip ?? "")}:${userId}`;
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -41,7 +42,7 @@ export const sensitiveWriteLimiterConfig = {
   skipSuccessfulRequests: false,
   keyGenerator: (req: Request): string => {
     const userId = req.body?.user_id ?? "unknown";
-    return `sensitive:${req.ip}:${userId}`;
+    return `sensitive:${ipKeyGenerator(req.ip ?? "")}:${userId}`;
   },
   standardHeaders: true,
   legacyHeaders: false,
