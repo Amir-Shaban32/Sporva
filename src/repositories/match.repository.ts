@@ -4,11 +4,9 @@ import { ICreateMatch } from "../types";
 
 class MatchRepository {
   async schedule(data: ICreateMatch) {
-    const year = new Date().getFullYear();
-    const season_matching = `${year}-${year + 1}`;
     return await prisma.matches.create({
       data: {
-        season: data.season ?? season_matching,
+        season: data.season!,
         round: data.round,
         stadium: data.stadium,
         host_team_id: data.host_team_id,
@@ -16,8 +14,8 @@ class MatchRepository {
         match_time: data.match_time,
         competition: data.competition,
         status: data.status,
-        host_team_score: data.host_team_score ?? 0,
-        guest_team_score: data.guest_team_score ?? 0,
+        host_team_score: data.host_team_score ?? null,
+        guest_team_score: data.guest_team_score ?? null,
         got_extra_time: data?.got_extra_time,
         got_penalties: data?.got_penalties,
         host_penalty_score: data?.host_penalty_score,
@@ -85,6 +83,22 @@ class MatchRepository {
   async findGotPenalties() {
     return await prisma.matches.findMany({
       where: { got_penalties: true },
+    });
+  }
+
+  async findByTeamsAndSeasonAndComp(
+    season: string,
+    guest_id: string,
+    host_id: string,
+    competition: Competitions,
+  ) {
+    return await prisma.matches.findFirst({
+      where: {
+        season,
+        guest_team_id: guest_id,
+        host_team_id: host_id,
+        competition,
+      },
     });
   }
 

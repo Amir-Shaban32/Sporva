@@ -29,6 +29,15 @@ class ManagerContractRepository {
     });
   }
 
+  async findByManagerAndTeam(manager_id: string, team_id: string) {
+    return await prisma.manager_Contracts.findMany({
+      where: {
+        manager_id,
+        team_id,
+      },
+    });
+  }
+
   async findActiveContracts() {
     return await prisma.manager_Contracts.findMany({
       where: { is_active: true },
@@ -41,11 +50,12 @@ class ManagerContractRepository {
     });
   }
 
-  async findByInterval(period: number) {
+  async findByInterval(periodInDays: number) {
     return await prisma.$queryRaw`
         SELECT *
         FROM "Manager_Contracts"
-        WHERE DATE_PART('day', "end_date" - "start_date") = ${period}
+        WHERE EXTRACT(EPOCH FROM ("end_date" - "start_date")) / 86400
+        BETWEEN ${periodInDays - 1} AND ${periodInDays + 1}
     `;
   }
 

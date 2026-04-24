@@ -21,6 +21,15 @@ class PlayerContractRepository {
     });
   }
 
+  async findByPlayerAndTeam(player_id: string, team_id: string) {
+    return await prisma.player_Contracts.findMany({
+      where: {
+        player_id,
+        team_id,
+      },
+    });
+  }
+
   async findAll(page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit;
     return await prisma.player_Contracts.findMany({
@@ -41,11 +50,12 @@ class PlayerContractRepository {
     });
   }
 
-  async findByInterval(period: number) {
+  async findByInterval(periodInDays: number) {
     return await prisma.$queryRaw`
         SELECT *
         FROM "Player_Contracts"
-        WHERE DATE_PART('day', "end_date" - "start_date") = ${period}
+        WHERE FLOOR(EXTRACT(EPOCH FROM ("end_date" - "start_date")) / 86400)
+        BETWEEN ${periodInDays - 1} AND ${periodInDays + 1}
     `;
   }
 
