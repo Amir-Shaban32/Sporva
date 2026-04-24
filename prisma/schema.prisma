@@ -130,8 +130,8 @@ model Matches {
   match_time          DateTime
   competition         Competitions
   status              Match_status
-  host_team_score     Int
-  guest_team_score    Int
+  host_team_score     Int?
+  guest_team_score    Int?
   got_extra_time      Boolean          @default(false)
   got_penalties       Boolean          @default(false)
   host_penalty_score  Int?
