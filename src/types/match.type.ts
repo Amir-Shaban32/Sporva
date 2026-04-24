@@ -27,12 +27,21 @@ export interface IMatch {
   match_time: Date;
   competition: Competitions;
   status: Match_status;
-  host_team_score: number;
-  guest_team_score: number;
+  host_team_score: number | null;
+  guest_team_score: number | null;
   got_extra_time: boolean;
   got_penalties: boolean;
   host_penalty_score: number | null;
   guest_penalty_score: number | null;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface ExtraTimeAndPenalty {
+  status?: string;
+  host_team_score?: number | null;
+  guest_team_score?: number | null;
+  got_extra_time?: boolean;
+  got_penalties?: boolean;
+  competition: Competitions;
 }
