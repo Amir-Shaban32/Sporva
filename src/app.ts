@@ -6,7 +6,7 @@ import teamRouter from "./routes/team.route";
 import refereeRouter from "./routes/referee.route";
 import playerRouter from "./routes/player.route";
 import playerContractRouter from "./routes/player-contract.route";
-import matchRouter from "./routes/manager.route";
+import matchRouter from "./routes/match.route";
 import matchRefereeRouter from "./routes/match-referee.route";
 import matchEventRouter from "./routes/match-event.route";
 import managerRouter from "./routes/manager.route";
