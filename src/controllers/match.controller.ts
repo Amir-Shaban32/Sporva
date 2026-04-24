@@ -23,12 +23,12 @@ export const scheduleMatch = catchAsync(async (req: Request, res: Response) => {
 
 export const getMatchByTeam = catchAsync(
   async (req: Request, res: Response) => {
-    const { team_id } = req.params;
-    if (!team_id) {
+    const { teamId } = req.params;
+    if (!teamId) {
       throw new BadRequestError("Bad request! Team ID is required");
     }
 
-    const matches = await getMatchByTeamService(team_id as string);
+    const matches = await getMatchByTeamService(teamId as string);
     return res.ok("Matches retrieved successfully", { matches });
   },
 );

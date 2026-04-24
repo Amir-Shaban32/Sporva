@@ -12,6 +12,7 @@ import {
   countUsersService,
 } from "../services";
 import { parsePagination } from "src/utils/parse-pagination";
+import { checkOwner } from "src/utils/check-ownership";
 
 export const createUser = catchAsync(async (req: Request, res: Response) => {
   const data = req.body;
@@ -24,8 +25,8 @@ export const getUserById = catchAsync(async (req: Request, res: Response) => {
   if (!id) {
     throw new BadRequestError("Bad request! ID is required");
   }
-
   const user = await getUserByIdService(id as string);
+  checkOwner(user, req);
   return res.ok("User retrieved successfully", { user });
 });
 
@@ -35,8 +36,8 @@ export const getUserByUsername = catchAsync(
     if (!username) {
       throw new BadRequestError("Bad request! Username is required");
     }
-
     const user = await getUserByUsernameService(username as string);
+    checkOwner(user, req);
     return res.ok("User retrieved successfully", { user });
   },
 );
@@ -49,6 +50,7 @@ export const getUserByEmail = catchAsync(
     }
 
     const user = await getUserByEmailService(email as string);
+    checkOwner(user, req);
     return res.ok("User retrieved successfully", { user });
   },
 );
@@ -72,6 +74,7 @@ export const updateUser = catchAsync(async (req: Request, res: Response) => {
   if (!id) throw new BadRequestError("Bad request! ID is required");
 
   const user = await updateUserService(id as string, data);
+  checkOwner(user, req);
   return res.ok("User updated successfully", { user });
 });
 
@@ -80,6 +83,9 @@ export const deleteUser = catchAsync(async (req: Request, res: Response) => {
   if (!id) {
     throw new BadRequestError("Bad request! ID is required");
   }
+
+  const user = await getUserByIdService(id as string);
+  checkOwner(user, req);
 
   await deleteUserService(id as string);
   return res.ok("User deleted successfully");

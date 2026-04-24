@@ -12,6 +12,7 @@ import {
   countManagerContractsService,
 } from "../services";
 import { parsePagination } from "../utils/parse-pagination";
+import { parsePeriod } from "../utils/parse-period";
 
 export const createManagerContract = catchAsync(
   async (req: Request, res: Response) => {
@@ -59,13 +60,13 @@ export const getExpiredManagerContracts = catchAsync(
 
 export const getManagerContractsByManager = catchAsync(
   async (req: Request, res: Response) => {
-    const { manager_id } = req.params;
-    if (!manager_id) {
+    const { managerId } = req.params;
+    if (!managerId) {
       throw new BadRequestError("Bad request! Manager ID is required");
     }
 
     const contracts = await getManagerContractsByManagerService(
-      manager_id as string,
+      managerId as string,
     );
     return res.ok("Manager contracts retrieved successfully", { contracts });
   },
@@ -85,14 +86,12 @@ export const deActivateManagerContract = catchAsync(
 
 export const getManagerContractsByInterval = catchAsync(
   async (req: Request, res: Response) => {
-    const { period } = req.query;
+    const period = parsePeriod(req);
     if (!period) {
       throw new BadRequestError("Bad request! Period is required");
     }
 
-    const contracts = await getManagerContractsByIntervalService(
-      parseInt(period as string),
-    );
+    const contracts = await getManagerContractsByIntervalService(period);
     return res.ok("Manager contracts retrieved successfully", { contracts });
   },
 );

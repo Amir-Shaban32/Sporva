@@ -12,6 +12,7 @@ import {
   countPlayerContractsService,
 } from "../services";
 import { parsePagination } from "../utils/parse-pagination";
+import { parsePeriod } from "../utils/parse-period";
 
 export const createPlayerContract = catchAsync(
   async (req: Request, res: Response) => {
@@ -59,13 +60,13 @@ export const getExpiredPlayerContracts = catchAsync(
 
 export const getPlayerContractsByPlayer = catchAsync(
   async (req: Request, res: Response) => {
-    const { player_id } = req.params;
-    if (!player_id) {
+    const { playerId } = req.params;
+    if (!playerId) {
       throw new BadRequestError("Bad request! Player ID is required");
     }
 
     const contracts = await getPlayerContractsByPlayerService(
-      player_id as string,
+      playerId as string,
     );
     return res.ok("Player contracts retrieved successfully", { contracts });
   },
@@ -85,14 +86,12 @@ export const deActivatePlayerContract = catchAsync(
 
 export const getPlayerContractsByInterval = catchAsync(
   async (req: Request, res: Response) => {
-    const { period } = req.query;
+    const period = parsePeriod(req);
     if (!period) {
       throw new BadRequestError("Bad request! Period is required");
     }
 
-    const contracts = await getPlayerContractsByIntervalService(
-      parseInt(period as string),
-    );
+    const contracts = await getPlayerContractsByIntervalService(period);
     return res.ok("Player contracts retrieved successfully", { contracts });
   },
 );
