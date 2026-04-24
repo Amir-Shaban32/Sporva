@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createManagerContractValidation = z.strictObject({
+export const baseManagerContractValidation = z.strictObject({
   manager_id: z.cuid(),
   team_id: z.cuid(),
   start_date: z.coerce.date(),
@@ -9,15 +9,15 @@ export const createManagerContractValidation = z.strictObject({
   is_active: z.boolean().optional(),
 });
 
-export const updateManagerContractValidation = createManagerContractValidation
-  .partial()
-  .refine((data) => Object.values(data).some((v) => v !== undefined), {
-    message: "At least one field must be provided",
-  });
+export const createManagerContractValidation =
+  baseManagerContractValidation.refine(
+    (data) => data.end_date > data.start_date,
+    {
+      message: "End date must be after start date",
+      path: ["end_date"],
+    },
+  );
 
 export type CreateManagerContractInput = z.infer<
   typeof createManagerContractValidation
->;
-export type UpdateManagerContractInput = z.infer<
-  typeof updateManagerContractValidation
 >;

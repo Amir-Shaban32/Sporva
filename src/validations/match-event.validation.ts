@@ -19,11 +19,4 @@ export const createMatchEventValidation = z.strictObject({
   minute: z.number().int().min(0).max(120),
 });
 
-export const updateMatchEventValidation = createMatchEventValidation
-  .partial()
-  .refine((data) => Object.values(data).some((v) => v !== undefined), {
-    message: "At least one field must be provided",
-  });
-
 export type CreateMatchEventInput = z.infer<typeof createMatchEventValidation>;
-export type UpdateMatchEventInput = z.infer<typeof updateMatchEventValidation>;

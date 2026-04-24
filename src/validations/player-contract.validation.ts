@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createPlayerContractValidation = z.strictObject({
+export const basePlayerContractValidation = z.strictObject({
   player_id: z.cuid(),
   team_id: z.cuid(),
   start_date: z.coerce.date(),
@@ -9,15 +9,15 @@ export const createPlayerContractValidation = z.strictObject({
   is_active: z.boolean().optional(),
 });
 
-export const updatePlayerContractValidation = createPlayerContractValidation
-  .partial()
-  .refine((data) => Object.values(data).some((v) => v !== undefined), {
-    message: "At least one field must be provided",
-  });
+export const createPlayerContractValidation =
+  basePlayerContractValidation.refine(
+    (data) => data.end_date > data.start_date,
+    {
+      message: "End date must be after start date",
+      path: ["end_date"],
+    },
+  );
 
 export type CreatePlayerContractInput = z.infer<
   typeof createPlayerContractValidation
->;
-export type UpdatePlayerContractInput = z.infer<
-  typeof updatePlayerContractValidation
 >;
