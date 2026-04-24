@@ -15,27 +15,49 @@ import {
   getAllManagers,
 } from "../controllers";
 import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
-import { paginationValidation } from "../validations/pagination.validation";
+import { paginationValidation } from "../validations/query.validation";
+import {
+  nameValidation,
+  nationalityValidation,
+} from "../validations/query.validation";
+import { idParamsValidation } from "../validations/params.validation";
+import { authentication } from "../middleware/authentication";
+import { verifyRole } from "../middleware/verify-role";
 
 const router: Router = Router();
 
 router.get("/", validate(paginationValidation, "query"), getAllManagers);
-router.get("/name", getManagerByName);
-router.get("/nationality", getManagerByNationality);
+router.get("/name", validate(nameValidation, "query"), getManagerByName);
+router.get(
+  "/nationality",
+  validate(nationalityValidation, "query"),
+  getManagerByNationality,
+);
 router.get("/count", countManagers);
-router.get("/:id", getManagerById);
+router.get("/:id", validate(idParamsValidation, "params"), getManagerById);
+
+router.use(authentication);
+
 router.post(
   "/",
   sensitiveWriteLimiter,
+  verifyRole("ADMIN"),
   validate(createManagerValidation),
   createManager,
 );
 router.patch(
   "/:id",
   sensitiveWriteLimiter,
+  verifyRole("ADMIN"),
   validate(updateManagerValidation),
   updateManager,
 );
-router.delete("/:id", sensitiveWriteLimiter, deleteManager);
+router.delete(
+  "/:id",
+  sensitiveWriteLimiter,
+  verifyRole("ADMIN"),
+  validate(idParamsValidation, "params"),
+  deleteManager,
+);
 
 export default router;

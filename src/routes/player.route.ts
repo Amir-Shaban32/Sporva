@@ -5,6 +5,15 @@ import {
   updatePlayerValidation,
 } from "../validations/player.validation";
 import {
+  nameValidation,
+  nationalityValidation,
+  positionValidation,
+} from "../validations/query.validation";
+import {
+  idParamsValidation,
+  teamIdParamsValidation,
+} from "../validations/params.validation";
+import {
   createPlayer,
   getPlayerByName,
   getPlayerByNationality,
@@ -17,29 +26,54 @@ import {
   getAllPlayers,
 } from "../controllers";
 import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
-import { paginationValidation } from "../validations/pagination.validation";
+import { paginationValidation } from "../validations/query.validation";
+import { authentication } from "../middleware/authentication";
+import { verifyRole } from "../middleware/verify-role";
 
 const router: Router = Router();
 
 router.get("/", validate(paginationValidation, "query"), getAllPlayers);
-router.get("/name", getPlayerByName);
-router.get("/nationality", getPlayerByNationality);
-router.get("/position", getPlayerByPosition);
+router.get("/name", validate(nameValidation, "query"), getPlayerByName);
+router.get(
+  "/nationality",
+  validate(nationalityValidation, "query"),
+  getPlayerByNationality,
+);
+router.get(
+  "/position",
+  validate(positionValidation, "query"),
+  getPlayerByPosition,
+);
 router.get("/count", countPlayers);
-router.get("/:id", getPlayerById);
-router.get("/team/:teamId", getPlayerByTeam);
+router.get("/:id", validate(idParamsValidation, "params"), getPlayerById);
+router.get(
+  "/team/:teamId",
+  validate(teamIdParamsValidation, "params"),
+  getPlayerByTeam,
+);
+
+router.use(authentication);
+
 router.post(
   "/",
   sensitiveWriteLimiter,
+  verifyRole("ADMIN"),
   validate(createPlayerValidation),
   createPlayer,
 );
 router.patch(
   "/:id",
   sensitiveWriteLimiter,
+  verifyRole("ADMIN"),
   validate(updatePlayerValidation),
   updatePlayer,
 );
-router.delete("/:id", sensitiveWriteLimiter, deletePlayer);
+router.delete(
+  "/:id",
+  sensitiveWriteLimiter,
+  verifyRole("ADMIN"),
+  validate(idParamsValidation, "params"),
+  deletePlayer,
+);
 
 export default router;

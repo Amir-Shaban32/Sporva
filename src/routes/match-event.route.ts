@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { validate } from "../middleware/validate.middleware";
+import { createMatchEventValidation } from "../validations/match-event.validation";
 import {
-  createMatchEventValidation,
-  updateMatchEventValidation,
-} from "../validations/match-event.validation";
+  playerIdParamsValidation,
+  matchIdParamsValidation,
+  idParamsValidation,
+} from "../validations/params.validation";
 import {
   createMatchEvent,
   getMatchEventsByMatch,
@@ -12,18 +14,38 @@ import {
   deleteMatchEvent,
 } from "../controllers";
 import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
+import { authentication } from "../middleware/authentication";
+import { verifyRole } from "../middleware/verify-role";
 
 const router: Router = Router();
 
 router.get("/", getMatchEventsByType);
-router.get("/playerId", getMatchEventsByPlayer);
-router.get("/:matchId", getMatchEventsByMatch);
+router.get(
+  "/:playerId",
+  validate(playerIdParamsValidation, "params"),
+  getMatchEventsByPlayer,
+);
+router.get(
+  "/:matchId",
+  validate(matchIdParamsValidation, "params"),
+  getMatchEventsByMatch,
+);
+
+router.use(authentication);
+
 router.post(
   "/",
   sensitiveWriteLimiter,
+  verifyRole("ADMIN"),
   validate(createMatchEventValidation),
   createMatchEvent,
 );
-router.delete("/:id", sensitiveWriteLimiter, deleteMatchEvent);
+router.delete(
+  "/:id",
+  sensitiveWriteLimiter,
+  verifyRole("ADMIN"),
+  validate(idParamsValidation, "params"),
+  deleteMatchEvent,
+);
 
 export default router;
