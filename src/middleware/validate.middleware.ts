@@ -10,8 +10,18 @@ export const validate =
     const result = schema.safeParse(req[target]);
 
     if (!result.success) {
-      const { fieldErrors } = z.flattenError(result.error);
-      return next(new BadRequestError("Validation failed", fieldErrors));
+      const treeError = z.treeifyError(result.error); // field errors + root errors
+      const errors: Record<string, string[]> = {};
+
+      for (const [key, val] of Object.entries(treeError)) {
+        if (key !== "errors" && val && typeof val === "object") {
+          errors[key] = (val as any).errors ?? [];
+        }
+      }
+
+      if (treeError.errors.length > 0) errors["_root"] = treeError.errors;
+
+      return next(new BadRequestError("Validation failed", errors));
     }
 
     Object.assign(req[target], result.data);
