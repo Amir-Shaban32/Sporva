@@ -1,5 +1,4 @@
 import { Request } from "express";
-import { PaginationQuery } from "src/validations/pagination.validation";
 
 export interface ParsedPagination {
   page: number;
