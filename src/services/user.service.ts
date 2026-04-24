@@ -6,6 +6,7 @@ import {
   NotFoundError,
   BadRequestError,
 } from "../errors/app-error";
+import { hashPassword } from "src/utils/password";
 
 export const createUserService = async (data: ICreateUser): Promise<IUser> => {
   const existing = await userRepository.findByUsername(data.username);
@@ -17,6 +18,9 @@ export const createUserService = async (data: ICreateUser): Promise<IUser> => {
   if (existingEmail) {
     throw new ConflictError("Email already exists");
   }
+
+  const hashedPassword = await hashPassword(data.password);
+  data.password = hashedPassword;
 
   const user = await userRepository.create(data);
   return user;

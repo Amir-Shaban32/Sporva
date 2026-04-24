@@ -11,17 +11,18 @@ import { NotFoundError, UnprocessableEntityError } from "../errors/app-error";
 export const createMatchEventService = async (
   data: ICreateMatchEvent,
 ): Promise<IMatchEvent> => {
-  const player = await playerRepository.findById(data.player_id);
-  if (!player) {
-    throw new NotFoundError("Player not found");
-  }
-  const team = await teamRepository.findById(data.team_id);
-  if (!team) {
-    throw new NotFoundError("Team not found");
-  }
-  const match = await matchRepository.findById(data.match_id);
-  if (!match) {
-    throw new NotFoundError("Match not found");
+  const [player, team, match] = await Promise.all([
+    playerRepository.findById(data.player_id),
+    teamRepository.findById(data.team_id),
+    matchRepository.findById(data.match_id),
+  ]);
+  if (!player || !team || !match) {
+    const missing = [
+      !player && "Player",
+      !team && "Team",
+      !match && "Match",
+    ].filter(Boolean);
+    throw new NotFoundError(`${missing.join(", ")} not found`);
   }
 
   if (player.team_id !== data.team_id) {

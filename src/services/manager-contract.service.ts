@@ -1,11 +1,30 @@
-import { managerContractRepository } from "../repositories";
+import {
+  managerContractRepository,
+  managerRepository,
+  teamRepository,
+} from "../repositories";
 import { IManagerContract, ICreateManagerContract } from "../types";
 import { NotFoundError } from "../errors/app-error";
 import { BadRequestError } from "../errors/app-error";
+import { checkContractOverlap } from "../utils/contract-validation";
 
 export const createManagerContractService = async (
   data: ICreateManagerContract,
 ): Promise<IManagerContract> => {
+  const [manager, team] = await Promise.all([
+    managerRepository.findById(data.manager_id),
+    teamRepository.findById(data.team_id),
+  ]);
+
+  if (!manager) {
+    throw new NotFoundError("Manager not found");
+  }
+  if (!team) {
+    throw new NotFoundError("Team not found");
+  }
+  const existingContracts =
+    await managerContractRepository.findByManagerAndTeam(manager.id, team.id);
+  checkContractOverlap(existingContracts, data);
   const contract = await managerContractRepository.create(data);
   return contract;
 };

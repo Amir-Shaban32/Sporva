@@ -6,18 +6,27 @@ import {
 import { IPlayerContract, ICreatePlayerContract } from "../types";
 import { NotFoundError } from "../errors/app-error";
 import { BadRequestError } from "../errors/app-error";
+import { checkContractOverlap } from "../utils/contract-validation";
 
 export const createPlayerContractService = async (
   data: ICreatePlayerContract,
 ): Promise<IPlayerContract> => {
-  const player = await playerRepository.findById(data.player_id);
+  const [player, team] = await Promise.all([
+    playerRepository.findById(data.player_id),
+    teamRepository.findById(data.team_id),
+  ]);
+
   if (!player) {
     throw new NotFoundError("Player not found");
   }
-  const team = await teamRepository.findById(data.team_id);
   if (!team) {
     throw new NotFoundError("Team not found");
   }
+  const existingContracts = await playerContractRepository.findByPlayerAndTeam(
+    player.id,
+    team.id,
+  );
+  checkContractOverlap(existingContracts, data);
   const contract = await playerContractRepository.create(data);
   return contract;
 };

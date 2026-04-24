@@ -1,12 +1,37 @@
 import { matchRepository } from "../repositories";
 import { IMatch, ICreateMatch } from "../types";
 import { Prisma, Match_status, Competitions } from "../../generated/prisma";
-import { NotFoundError } from "../errors/app-error";
+import {
+  ConflictError,
+  NotFoundError,
+  UnprocessableEntityError,
+} from "../errors/app-error";
+import { checkValidUpdateMatch } from "../utils/check-update-match";
 
 export const scheduleMatchService = async (
   data: ICreateMatch,
 ): Promise<IMatch> => {
-  const match = await matchRepository.schedule(data);
+  const currentYear = new Date().getFullYear();
+  const season = data.season ?? `${currentYear}-${currentYear + 1}`;
+  const seasonYear = Number(season.split("-")[0]);
+
+  const matchYear = new Date(data.match_time).getFullYear();
+  const isValidTime = matchYear <= seasonYear + 1 && matchYear >= seasonYear;
+
+  if (!isValidTime)
+    throw new UnprocessableEntityError(
+      "Can't create Match outside season time zone",
+    );
+
+  const existing = await matchRepository.findByTeamsAndSeasonAndComp(
+    season,
+    data.guest_team_id,
+    data.host_team_id,
+    data.competition,
+  );
+  if (existing)
+    throw new ConflictError("Match already scheduled for this season");
+  const match = await matchRepository.schedule({ ...data, season });
   return match;
 };
 
@@ -31,7 +56,8 @@ export const getLiveMatchesService = async (): Promise<IMatch[]> => {
 export const getMatchesByStatusService = async (
   status: Match_status,
 ): Promise<IMatch[]> => {
-  const matches = await matchRepository.findByStatus(status);
+  const normalizedStatus = status.toUpperCase() as Match_status;
+  const matches = await matchRepository.findByStatus(normalizedStatus);
   if (!matches.length) {
     throw new NotFoundError("No matches found");
   }
@@ -41,7 +67,8 @@ export const getMatchesByStatusService = async (
 export const getMatchesByCompetitionService = async (
   competition: Competitions,
 ): Promise<IMatch[]> => {
-  const matches = await matchRepository.findByComp(competition);
+  const normalizedComp = competition.toUpperCase() as Competitions;
+  const matches = await matchRepository.findByComp(normalizedComp);
   if (!matches.length) {
     throw new NotFoundError("No matches found");
   }
@@ -60,11 +87,12 @@ export const updateMatchService = async (
   id: string,
   data: Prisma.MatchesUpdateInput,
 ): Promise<IMatch> => {
-  const match = await matchRepository.update(id, data);
-  if (!match) {
+  const existing = await matchRepository.findById(id);
+  if (!existing) {
     throw new NotFoundError("Match not found");
   }
-
+  checkValidUpdateMatch(data, existing);
+  const match = await matchRepository.update(id, data);
   return match;
 };
 
