@@ -1,12 +1,6 @@
 import { z } from "zod";
 import { Positions, Match_status, Competitions } from "generated/prisma";
 
-const toUpperCaseEnum = (values: [string, ...string[]]) =>
-  z.preprocess(
-    (val) => (typeof val === "string" ? val.toUpperCase() : val),
-    z.enum(values),
-  );
-
 export const paginationValidation = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(10),
@@ -40,20 +34,15 @@ export const intervalValidation = z.object({
 });
 
 export const positionValidation = z.object({
-  position: toUpperCaseEnum(Object.values(Positions) as [string, ...string[]]),
+  position: z.enum(Object.values(Positions) as [string, ...string[]]),
 });
 
 export const matchStatusValidation = z.object({
-  status: z
-    .string()
-    .transform((val) => val.toUpperCase())
-    .pipe(z.enum(Object.values(Match_status) as [string, ...string[]])),
+  status: z.enum(Object.values(Match_status) as [string, ...string[]]),
 });
 
 export const competitionValidation = z.object({
-  competition: toUpperCaseEnum(
-    Object.values(Competitions) as [string, ...string[]],
-  ),
+  competition: z.enum(Object.values(Competitions) as [string, ...string[]]),
 });
 
 export const dateValidation = z.object({
