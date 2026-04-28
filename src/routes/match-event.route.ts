@@ -19,14 +19,14 @@ import { verifyRole } from "../middleware/verify-role";
 
 const router: Router = Router();
 
-router.get("/", getMatchEventsByType);
+router.get("/eventType", getMatchEventsByType);
 router.get(
-  "/:playerId",
+  "/player/:playerId",
   validate(playerIdParamsValidation, "params"),
   getMatchEventsByPlayer,
 );
 router.get(
-  "/:matchId",
+  "/match/:matchId",
   validate(matchIdParamsValidation, "params"),
   getMatchEventsByMatch,
 );

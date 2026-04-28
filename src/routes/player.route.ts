@@ -5,7 +5,7 @@ import {
   updatePlayerValidation,
 } from "../validations/player.validation";
 import {
-  nameValidation,
+  playerNameValidation,
   nationalityValidation,
   positionValidation,
 } from "../validations/query.validation";
@@ -33,7 +33,7 @@ import { verifyRole } from "../middleware/verify-role";
 const router: Router = Router();
 
 router.get("/", validate(paginationValidation, "query"), getAllPlayers);
-router.get("/name", validate(nameValidation, "query"), getPlayerByName);
+router.get("/name", validate(playerNameValidation, "query"), getPlayerByName);
 router.get(
   "/nationality",
   validate(nationalityValidation, "query"),

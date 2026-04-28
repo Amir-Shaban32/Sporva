@@ -15,9 +15,9 @@ import {
   getAllManagers,
 } from "../controllers";
 import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
-import { paginationValidation } from "../validations/query.validation";
 import {
-  nameValidation,
+  paginationValidation,
+  playerNameValidation,
   nationalityValidation,
 } from "../validations/query.validation";
 import { idParamsValidation } from "../validations/params.validation";
@@ -27,7 +27,7 @@ import { verifyRole } from "../middleware/verify-role";
 const router: Router = Router();
 
 router.get("/", validate(paginationValidation, "query"), getAllManagers);
-router.get("/name", validate(nameValidation, "query"), getManagerByName);
+router.get("/name", validate(playerNameValidation, "query"), getManagerByName);
 router.get(
   "/nationality",
   validate(nationalityValidation, "query"),

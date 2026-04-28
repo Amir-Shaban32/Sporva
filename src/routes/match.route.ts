@@ -3,7 +3,7 @@ import { validate } from "../middleware/validate.middleware";
 import {
   createMatchValidation,
   updateMatchValidation,
-} from "../validations/match/match.validation";
+} from "../validations/match";
 import {
   roundValidation,
   seasonValidation,
@@ -11,7 +11,10 @@ import {
   competitionValidation,
   dateValidation,
 } from "../validations/query.validation";
-import { teamIdParamsValidation } from "../validations/params.validation";
+import {
+  idParamsValidation,
+  teamIdParamsValidation,
+} from "../validations/params.validation";
 import {
   scheduleMatch,
   getMatchByTeam,
@@ -24,6 +27,7 @@ import {
   getMatchesWithExtraTime,
   getMatchesWithPenalties,
   updateMatch,
+  recordMatchResult,
 } from "../controllers";
 import { sensitiveWriteLimiter } from "../middleware/rate-limit.middleware";
 import { authentication } from "../middleware/authentication";
@@ -58,7 +62,6 @@ router.get(
 );
 
 router.use(authentication);
-
 router.post(
   "/",
   sensitiveWriteLimiter,
@@ -72,6 +75,14 @@ router.patch(
   verifyRole("ADMIN"),
   validate(updateMatchValidation),
   updateMatch,
+);
+
+router.patch(
+  "/:id/result",
+  sensitiveWriteLimiter,
+  verifyRole("ADMIN"),
+  validate(idParamsValidation, "params"),
+  recordMatchResult,
 );
 
 export default router;

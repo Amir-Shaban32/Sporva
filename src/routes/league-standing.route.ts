@@ -8,8 +8,12 @@ import {
   getLeagueTableByLeastGoalsAgainst,
   getLeagueTableByGoalsDifference,
 } from "../controllers";
+import { leagueSeasonValidation } from "src/validations/query.validation";
+import { validate } from "../middleware/validate.middleware";
 
 const router: Router = Router();
+
+router.use(validate(leagueSeasonValidation, "query"));
 
 router.get("/table", getLeagueTable);
 router.get("/wins", getLeagueTableByMostWins);

@@ -9,8 +9,8 @@ import {
   matchIdParamsValidation,
 } from "../validations/params.validation";
 import {
-  nameValidation,
   nationalityValidation,
+  playerNameValidation,
 } from "../validations/query.validation";
 import {
   createReferee,
@@ -31,7 +31,7 @@ import { verifyRole } from "../middleware/verify-role";
 const router: Router = Router();
 
 router.get("/", validate(paginationValidation, "query"), getAllReferees);
-router.get("/name", validate(nameValidation, "query"), getRefereeByName);
+router.get("/name", validate(playerNameValidation, "query"), getRefereeByName);
 router.get(
   "/nationality",
   validate(nationalityValidation, "query"),
