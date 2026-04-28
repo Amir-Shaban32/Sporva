@@ -49,17 +49,9 @@ export const checkValidUpdateMatch = (
     );
   }
 
-  if (isRelevantStatus && !hasEqualScore) {
-    if (gotExtra) {
-      throw new UnprocessableEntityError(
-        "Extra time can only be set when scores are equal",
-      );
-    }
-
-    if (gotPenalties) {
-      throw new UnprocessableEntityError(
-        "Penalties can only be set when scores are equal",
-      );
-    }
+  if (isRelevantStatus && !hasEqualScore && gotPenalties) {
+    throw new UnprocessableEntityError(
+      "Penalties can only be set when scores are equal",
+    );
   }
 };
