@@ -12,6 +12,12 @@ class MatchRefereeRepository {
     });
   }
 
+  async findByRefereeAndMatch(referee_id: string, match_id: string) {
+    return await prisma.match_Referees.findFirst({
+      where: { referee_id, match_id },
+    });
+  }
+
   async findByMatch(match_id: string) {
     return await prisma.match_Referees.findMany({
       where: { match_id },

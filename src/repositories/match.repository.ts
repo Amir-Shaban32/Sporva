@@ -108,6 +108,13 @@ class MatchRepository {
       data: data,
     });
   }
+
+  async updateStatus(id: string, tx: Prisma.TransactionClient = prisma) {
+    return await tx.matches.update({
+      where: { id },
+      data: { status: "FINISHED" },
+    });
+  }
 }
 
 export const matchRepository = new MatchRepository();

@@ -1,135 +1,78 @@
+import { Prisma } from "generated/prisma";
 import { prisma } from "../lib/prisma";
-import { ILeagueStanding } from "../types";
-
-interface MatchResult {
-  won: boolean;
-  drew: boolean;
-  goals_for: number;
-  goals_against: number;
-}
+import { ILeagueStanding, MatchResult } from "../types";
 
 class LeagueStandingsRepository {
-  async tableOrder(season?: string) {
-    let curr_season;
-    if (season) {
-      curr_season = season;
-    } else {
-      const year = new Date().getFullYear();
-      curr_season = `${year}-${year + 1}`;
-    }
-
+  async tableOrder(season: string) {
     return await prisma.$queryRaw<ILeagueStanding[]>`
             SELECT *
             FROM "League_Standings"
-            WHERE "season" = ${curr_season}
+            WHERE "season" = ${season}
             ORDER BY "points" DESC
         `;
   }
 
-  async tableOrderByMostWins(season?: string) {
-    let curr_season;
-    if (season) {
-      curr_season = season;
-    } else {
-      const year = new Date().getFullYear();
-      curr_season = `${year}-${year + 1}`;
-    }
-
+  async tableOrderByMostWins(season: string) {
     return await prisma.$queryRaw<ILeagueStanding[]>`
             SELECT *
             FROM "League_Standings"
-            WHERE "season" = ${curr_season}
+            WHERE "season" = ${season}
             ORDER BY "wins" DESC
         `;
   }
 
-  async tableOrderByMostDraws(season?: string) {
-    let curr_season;
-    if (season) {
-      curr_season = season;
-    } else {
-      const year = new Date().getFullYear();
-      curr_season = `${year}-${year + 1}`;
-    }
-
+  async tableOrderByMostDraws(season: string) {
     return await prisma.$queryRaw<ILeagueStanding[]>`
             SELECT *
             FROM "League_Standings"
-            WHERE "season" = ${curr_season}
+            WHERE "season" = ${season}
             ORDER BY "draws" DESC
         `;
   }
 
-  async tableOrderByLeastLoses(season?: string) {
-    let curr_season;
-    if (season) {
-      curr_season = season;
-    } else {
-      const year = new Date().getFullYear();
-      curr_season = `${year}-${year + 1}`;
-    }
-
+  async tableOrderByLeastLoses(season: string) {
     return await prisma.$queryRaw<ILeagueStanding[]>`
             SELECT *
             FROM "League_Standings"
-            WHERE "season" = ${curr_season}
+            WHERE "season" = ${season}
             ORDER BY "losses"
         `;
   }
 
-  async tableOrderByMostGoalsFor(season?: string) {
-    let curr_season;
-    if (season) {
-      curr_season = season;
-    } else {
-      const year = new Date().getFullYear();
-      curr_season = `${year}-${year + 1}`;
-    }
-
+  async tableOrderByMostGoalsFor(season: string) {
     return await prisma.$queryRaw<ILeagueStanding[]>`
             SELECT *
             FROM "League_Standings"
-            WHERE "season" = ${curr_season}
+            WHERE "season" = ${season}
             ORDER BY "goals_for" DESC
         `;
   }
 
   async tableOrderByLeastGoalsAgainst(season?: string) {
-    let curr_season;
-    if (season) {
-      curr_season = season;
-    } else {
-      const year = new Date().getFullYear();
-      curr_season = `${year}-${year + 1}`;
-    }
-
     return await prisma.$queryRaw<ILeagueStanding[]>`
             SELECT *
             FROM "League_Standings"
-            WHERE "season" = ${curr_season}
+            WHERE "season" = ${season}
             ORDER BY "goals_against" DESC
         `;
   }
 
   async tableOrderByGoalsDifference(season?: string) {
-    let curr_season;
-    if (season) {
-      curr_season = season;
-    } else {
-      const year = new Date().getFullYear();
-      curr_season = `${year}-${year + 1}`;
-    }
-
     return await prisma.$queryRaw<ILeagueStanding[]>`
             SELECT *
             FROM "League_Standings"
-            WHERE "season" = ${curr_season}
+            WHERE "season" = ${season}
             ORDER BY "goals_for"-"goals_against" DESC
         `;
   }
 
-  async updateAfterMatch(team_id: string, season: string, result: MatchResult) {
-    return await prisma.league_Standings.upsert({
+  async updateAfterMatch(
+    team_id: string,
+    season: string,
+    result: MatchResult,
+    tx: Prisma.TransactionClient = prisma,
+  ) {
+    return await tx.league_Standings.upsert({
       where: { season_team_id: { team_id, season } },
       create: {
         team_id,
