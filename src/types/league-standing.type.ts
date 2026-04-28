@@ -9,3 +9,10 @@ export interface ILeagueStanding {
   goals_against: number;
   points: number;
 }
+
+export interface MatchResult {
+  won: boolean;
+  drew: boolean;
+  goals_for: number;
+  goals_against: number;
+}
