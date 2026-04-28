@@ -19,36 +19,35 @@ export const createMatchEvent = catchAsync(
 
 export const getMatchEventsByMatch = catchAsync(
   async (req: Request, res: Response) => {
-    const { match_id } = req.params;
-    if (!match_id) {
+    const { matchId } = req.params;
+    if (!matchId) {
       throw new BadRequestError("Bad request! Match ID is required");
     }
-
-    const events = await getMatchEventsByMatchService(match_id as string);
+    const events = await getMatchEventsByMatchService(matchId as string);
     return res.ok("Match events retrieved successfully", { events });
   },
 );
 
 export const getMatchEventsByType = catchAsync(
   async (req: Request, res: Response) => {
-    const { event_type } = req.query;
-    if (!event_type) {
+    const { eventType } = req.query;
+    if (!eventType) {
       throw new BadRequestError("Bad request! Event type is required");
     }
 
-    const events = await getMatchEventsByTypeService(event_type as Event_types);
+    const events = await getMatchEventsByTypeService(eventType as Event_types);
     return res.ok("Match events retrieved successfully", { events });
   },
 );
 
 export const getMatchEventsByPlayer = catchAsync(
   async (req: Request, res: Response) => {
-    const { player_id } = req.params;
-    if (!player_id) {
+    const { playerId } = req.params;
+    if (!playerId) {
       throw new BadRequestError("Bad request! Player ID is required");
     }
 
-    const events = await getMatchEventsByPlayerService(player_id as string);
+    const events = await getMatchEventsByPlayerService(playerId as string);
     return res.ok("Match events retrieved successfully", { events });
   },
 );

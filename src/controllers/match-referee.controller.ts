@@ -19,12 +19,12 @@ export const assignRefereeToMatch = catchAsync(
 
 export const getMatchByReferee = catchAsync(
   async (req: Request, res: Response) => {
-    const { referee_id } = req.params;
-    if (!referee_id) {
+    const { refereeId } = req.params;
+    if (!refereeId) {
       throw new BadRequestError("Bad request! Referee ID is required");
     }
 
-    const assignments = await getMatchesByRefereeService(referee_id as string);
+    const assignments = await getMatchesByRefereeService(refereeId as string);
     return res.ok("Matches retrieved successfully", { assignments });
   },
 );

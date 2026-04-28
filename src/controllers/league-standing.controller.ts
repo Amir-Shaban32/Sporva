@@ -11,50 +11,65 @@ import {
 } from "../services";
 
 export const getLeagueTable = catchAsync(
-  async (_req: Request, res: Response) => {
-    const standings = await getLeagueTableService();
+  async (req: Request, res: Response) => {
+    const { season } = req.query;
+    const standings = await getLeagueTableService(season as string);
     return res.ok("League table retrieved successfully", { standings });
   },
 );
 
 export const getLeagueTableByMostWins = catchAsync(
-  async (_req: Request, res: Response) => {
-    const standings = await getLeagueTableByMostWinsService();
+  async (req: Request, res: Response) => {
+    const { season } = req.query;
+    const standings = await getLeagueTableByMostWinsService(season as string);
     return res.ok("League table retrieved successfully", { standings });
   },
 );
 
 export const getLeagueTableByMostDraws = catchAsync(
-  async (_req: Request, res: Response) => {
-    const standings = await getLeagueTableByMostDrawsService();
+  async (req: Request, res: Response) => {
+    const { season } = req.query;
+    const standings = await getLeagueTableByMostDrawsService(season as string);
     return res.ok("League table retrieved successfully", { standings });
   },
 );
 
 export const getLeagueTableByLeastLosses = catchAsync(
-  async (_req: Request, res: Response) => {
-    const standings = await getLeagueTableByLeastLossesService();
+  async (req: Request, res: Response) => {
+    const { season } = req.query;
+    const standings = await getLeagueTableByLeastLossesService(
+      season as string,
+    );
     return res.ok("League table retrieved successfully", { standings });
   },
 );
 
 export const getLeagueTableByMostGoalsFor = catchAsync(
-  async (_req: Request, res: Response) => {
-    const standings = await getLeagueTableByMostGoalsForService();
+  async (req: Request, res: Response) => {
+    const { season } = req.query;
+    const standings = await getLeagueTableByMostGoalsForService(
+      season as string,
+    );
     return res.ok("League table retrieved successfully", { standings });
   },
 );
 
 export const getLeagueTableByLeastGoalsAgainst = catchAsync(
-  async (_req: Request, res: Response) => {
-    const standings = await getLeagueTableByLeastGoalsAgainstService();
+  async (req: Request, res: Response) => {
+    const { season } = req.query;
+    const standings = await getLeagueTableByLeastGoalsAgainstService(
+      season as string,
+    );
     return res.ok("League table retrieved successfully", { standings });
   },
 );
 
 export const getLeagueTableByGoalsDifference = catchAsync(
-  async (_req: Request, res: Response) => {
-    const standings = await getLeagueTableByGoalsDifferenceService();
+  async (req: Request, res: Response) => {
+    const { season } = req.query;
+    const standings = await getLeagueTableByGoalsDifferenceService(
+      season as string,
+    );
     return res.ok("League table retrieved successfully", { standings });
   },
 );

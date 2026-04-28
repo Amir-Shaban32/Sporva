@@ -13,6 +13,7 @@ import {
   getMatchesByRoundService,
   getMatchesWithExtraTimeService,
   getMatchesWithPenaltiesService,
+  recordMatchResultService,
 } from "../services";
 import { Match_status, Competitions } from "../../generated/prisma";
 
@@ -125,3 +126,13 @@ export const updateMatch = catchAsync(async (req: Request, res: Response) => {
   const match = await updateMatchService(id as string, req.body);
   return res.ok("Match updated successfully", { match });
 });
+
+export const recordMatchResult = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    if (!id) throw new BadRequestError("Bad request! ID is required");
+
+    await recordMatchResultService(id as string);
+    return res.ok("Match result recorded successfully");
+  },
+);
