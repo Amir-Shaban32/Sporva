@@ -11,8 +11,17 @@ export const usernameValidation = z.object({
 });
 
 export const nameValidation = z.object({
-  username: z.string().min(2, "Name is required"),
+  name: z.string().min(2, "Name is required"),
 });
+
+export const playerNameValidation = z
+  .object({
+    f_name: z.string().min(2, "Name is required").optional(),
+    l_name: z.string().min(2, "Name is required").optional(),
+  })
+  .refine((data) => Object.values(data).some((v) => v !== undefined), {
+    message: "At least one name last or first is required",
+  });
 
 export const emailValidation = z.object({
   email: z.email("Email is required"),
@@ -34,15 +43,24 @@ export const intervalValidation = z.object({
 });
 
 export const positionValidation = z.object({
-  position: z.enum(Object.values(Positions) as [string, ...string[]]),
+  position: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .pipe(z.enum(Object.values(Positions) as [string, ...string[]])),
 });
 
 export const matchStatusValidation = z.object({
-  status: z.enum(Object.values(Match_status) as [string, ...string[]]),
+  status: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .pipe(z.enum(Object.values(Match_status) as [string, ...string[]])),
 });
 
 export const competitionValidation = z.object({
-  competition: z.enum(Object.values(Competitions) as [string, ...string[]]),
+  competition: z
+    .string()
+    .transform((val) => val.toUpperCase())
+    .pipe(z.enum(Object.values(Competitions) as [string, ...string[]])),
 });
 
 export const dateValidation = z.object({
@@ -53,6 +71,10 @@ export const seasonValidation = z.object({
   season: z
     .string()
     .regex(/^\d{4}-\d{4}$/, "Season must be in format YYYY-YYYY"),
+});
+
+export const leagueSeasonValidation = seasonValidation.extend({
+  season: seasonValidation.shape.season.optional(),
 });
 
 export const roundValidation = z.object({

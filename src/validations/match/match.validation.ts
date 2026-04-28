@@ -1,13 +1,14 @@
 import { z } from "zod";
+import { penaltyUnion, penaltyUnionPartial } from "./match-penalty.validation";
+import { matchBase } from "./match-base.validation";
 import {
-  penaltyUnion,
-  matchBase,
   scoreRefinement,
+  scoreRefinementPartial,
+} from "./match-score.validation";
+import {
   teamIdRefinement,
   extraTimeAndPenaltyRefinement,
-  penaltyUnionPartial,
-  scoreRefinementPartial,
-} from "../match";
+} from "./match-refinements";
 
 export const createMatchValidation = matchBase
   .and(penaltyUnion)
