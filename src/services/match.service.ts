@@ -1,5 +1,5 @@
-import { matchRepository } from "../repositories";
-import { IMatch, ICreateMatch } from "../types";
+import { matchRepository, leagueStandingsRepository } from "../repositories";
+import { IMatch, ICreateMatch, MatchResult } from "../types";
 import { Prisma, Match_status, Competitions } from "../../generated/prisma";
 import {
   ConflictError,
@@ -7,6 +7,9 @@ import {
   UnprocessableEntityError,
 } from "../errors/app-error";
 import { checkValidUpdateMatch } from "../utils/check-update-match";
+import { computeMatchDeltas } from "../utils/compute-match-deltas";
+import { checkValidRecordResult } from "../utils/check-valid-result";
+import { prisma } from "src/lib/prisma";
 
 export const scheduleMatchService = async (
   data: ICreateMatch,
@@ -94,6 +97,39 @@ export const updateMatchService = async (
   checkValidUpdateMatch(data, existing);
   const match = await matchRepository.update(id, data);
   return match;
+};
+
+export const recordMatchResultService = async (id: string): Promise<void> => {
+  const match = await matchRepository.findById(id);
+  if (!match) throw new NotFoundError("Match not found");
+  if (match.guest_team_score === null || match.host_team_score === null) {
+    throw new UnprocessableEntityError("Match scores are not recorded");
+  }
+  checkValidRecordResult(match);
+
+  const [guest_result, host_result] = computeMatchDeltas(
+    match.guest_team_score,
+    match.host_team_score,
+  );
+
+  await prisma.$transaction(async (tx) => {
+    await matchRepository.updateStatus(match.id);
+
+    await Promise.all([
+      leagueStandingsRepository.updateAfterMatch(
+        match.guest_team_id,
+        match.season,
+        guest_result,
+        tx,
+      ),
+      leagueStandingsRepository.updateAfterMatch(
+        match.host_team_id,
+        match.season,
+        host_result,
+        tx,
+      ),
+    ]);
+  });
 };
 
 export const getMatchesByDateService = async (
