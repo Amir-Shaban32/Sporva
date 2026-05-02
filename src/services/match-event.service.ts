@@ -8,6 +8,7 @@ import { IMatchEvent, ICreateMatchEvent } from "../types";
 import { Event_types } from "../../generated/prisma";
 import { NotFoundError, UnprocessableEntityError } from "../errors/app-error";
 import { checkValidCreateMatchEvent } from "src/utils/check-create-event";
+import { logger } from "src/config";
 
 export const createMatchEventService = async (
   data: ICreateMatchEvent,
@@ -29,6 +30,31 @@ export const createMatchEventService = async (
   } else {
     event = await matchEventRepository.create(data);
   }
+  const logData = {
+    match_id: match.id,
+    player_id: player.id,
+    team_id: data.team_id,
+    event: data.event_type,
+  };
+
+  const isHighPriority =
+    data.event_type === "GOAL" ||
+    data.event_type === "SCORE_PENALTY" ||
+    data.event_type === "OWN_GOAL" ||
+    data.event_type === "RED_CARD" ||
+    data.event_type === "YELLOW_CARD";
+
+  if (isHighPriority) logger.info(logData, "Match event recorded");
+  else logger.debug(logData, "Match event recorded");
+
+  return event;
+};
+
+export const getMatchEventByIdService = async (
+  id: string,
+): Promise<IMatchEvent> => {
+  const event = await matchEventRepository.findById(id);
+  if (!event) throw new NotFoundError("No events found");
   return event;
 };
 
@@ -62,9 +88,8 @@ export const getMatchEventsByPlayerService = async (
   return events;
 };
 
-export const deleteMatchEventService = async (
-  id: string,
-): Promise<IMatchEvent> => {
-  const event = await matchEventRepository.delete(id);
-  return event;
+export const deleteMatchEventService = async (id: string): Promise<void> => {
+  const event = await matchEventRepository.findById(id);
+  if (!event) throw new NotFoundError("No event found");
+  await matchEventRepository.delete(id);
 };

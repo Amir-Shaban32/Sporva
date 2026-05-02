@@ -10,6 +10,7 @@ import { checkValidUpdateMatch } from "../utils/check-update-match";
 import { computeMatchDeltas } from "../utils/compute-match-deltas";
 import { checkValidRecordResult } from "../utils/check-valid-result";
 import { prisma } from "src/lib/prisma";
+import { logger } from "../config";
 
 export const scheduleMatchService = async (
   data: ICreateMatch,
@@ -102,10 +103,10 @@ export const updateMatchService = async (
 export const recordMatchResultService = async (id: string): Promise<void> => {
   const match = await matchRepository.findById(id);
   if (!match) throw new NotFoundError("Match not found");
+  checkValidRecordResult(match);
   if (match.guest_team_score === null || match.host_team_score === null) {
     throw new UnprocessableEntityError("Match scores are not recorded");
   }
-  checkValidRecordResult(match);
 
   const [guest_result, host_result] = computeMatchDeltas(
     match.guest_team_score,
@@ -130,6 +131,19 @@ export const recordMatchResultService = async (id: string): Promise<void> => {
       ),
     ]);
   });
+
+  logger.info(
+    {
+      match_id: id,
+      host_team_id: match.host_team_id,
+      guest_team_id: match.guest_team_id,
+      host_score: match.host_team_score,
+      guest_score: match.guest_team_score,
+      season: match.season,
+      round: match.round,
+    },
+    "Match result finalized",
+  );
 };
 
 export const getMatchesByDateService = async (
