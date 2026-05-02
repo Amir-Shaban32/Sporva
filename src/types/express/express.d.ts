@@ -21,7 +21,7 @@ export interface ApiErrorShape {
     message: string;
     errors?: unknown;
   };
-  // requestId?: string; later for logging
+  requestId?: string;
   timestamp: string;
 }
 
@@ -30,6 +30,7 @@ declare global {
     interface Response {
       ok<T>(message: string, data?: T): Response;
       created<T>(message: string, data?: T): Response;
+      noContent<T>(): Response;
       paginated<T>(
         items: T[],
         total: number,
@@ -38,16 +39,13 @@ declare global {
         message?: string,
       ): Response;
     }
-  }
-}
 
-declare global {
-  namespace Express {
     interface Request {
-      user: {
+      id: string;
+      user?: {
         id: string;
         username: string;
-        role: string;
+        role: "USER" | "ADMIN";
       };
     }
   }
