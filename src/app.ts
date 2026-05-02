@@ -1,4 +1,5 @@
 import express, { Application } from "express";
+import helmet from "helmet";
 import { responseMiddleware } from "./middleware/response.middleware";
 import userRouter from "./routes/user.route";
 import transferRouter from "./routes/transfer.route";
@@ -15,9 +16,23 @@ import leagueStandingsRouter from "./routes/league-standing.route";
 import authRouter from "./routes/auth/auth.route";
 import { errorHandler } from "./middleware/error-handler.middleware";
 import cookieParser from "cookie-parser";
+import { notFoundHandler } from "./middleware/error-handler.middleware";
+import httpLogger from "./middleware/request-log.middleware";
+import { corsConfig } from "./config/cors.config";
+import { requestId } from "./middleware/request-id";
 
 const app: Application = express();
 
+app.set("trust proxy", 1);
+app.use(requestId);
+app.use(httpLogger);
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
+app.use(corsConfig);
+app.options("/{*any}", corsConfig);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(responseMiddleware);
@@ -37,6 +52,7 @@ app.use("/api/managerContracts", managerContractRouter);
 app.use("/api/league", leagueStandingsRouter);
 app.use("/auth", authRouter);
 
+app.use(notFoundHandler);
 app.use(errorHandler);
 
 export default app;
