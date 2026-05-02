@@ -7,8 +7,9 @@ import {
   refreshTokenService,
 } from "../../services";
 import { extractDeviceInfo } from "../../utils/device-info";
+import { env } from "../../config";
 
-const isProd = process.env.NODE_ENV === "production";
+const isProd = env.NODE_ENV === "production";
 const cookieOptions = {
   httpOnly: true,
   sameSite: isProd ? ("none" as const) : ("lax" as const),
