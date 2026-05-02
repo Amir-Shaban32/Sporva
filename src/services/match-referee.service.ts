@@ -74,7 +74,6 @@ export const getMatchesByRefereeService = async (
 
 export const unAssignRefereeFromMatchService = async (
   data: ICreateMatchReferee,
-): Promise<IMatchReferee> => {
-  const result = await matchRefereeRepository.unAssign(data);
-  return result;
+): Promise<void> => {
+  await matchRefereeRepository.unAssign(data);
 };

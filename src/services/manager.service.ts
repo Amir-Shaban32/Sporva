@@ -79,15 +79,13 @@ export const updateManagerService = async (
   return manager;
 };
 
-export const deleteManagerService = async (id: string): Promise<IManager> => {
+export const deleteManagerService = async (id: string): Promise<void> => {
   const existing = await managerRepository.findById(id);
 
   if (!existing) {
     throw new NotFoundError("Manager not found");
   }
-  const manager = await managerRepository.delete(id);
-
-  return manager;
+  await managerRepository.delete(id);
 };
 
 export const countManagerService = async (): Promise<number> => {

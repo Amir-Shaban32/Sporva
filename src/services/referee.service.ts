@@ -80,15 +80,13 @@ export const updateRefereeService = async (
   return referee;
 };
 
-export const deleteRefereeService = async (id: string): Promise<IReferee> => {
+export const deleteRefereeService = async (id: string): Promise<void> => {
   const existing = await refereeRepository.findById(id);
 
   if (!existing) {
     throw new NotFoundError("Referee not found");
   }
-  const referee = await refereeRepository.delete(id);
-
-  return referee;
+  await refereeRepository.delete(id);
 };
 
 export const countRefereeService = async (): Promise<number> => {

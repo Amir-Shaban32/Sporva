@@ -83,13 +83,12 @@ export const updateUserService = async (
   return user;
 };
 
-export const deleteUserService = async (id: string): Promise<IUser> => {
+export const deleteUserService = async (id: string): Promise<void> => {
   const existing = await userRepository.findById(id);
   if (!existing) {
     throw new NotFoundError("User not found");
   }
-  const user = await userRepository.delete(id);
-  return user;
+  await userRepository.delete(id);
 };
 
 export const countUsersService = async (): Promise<number> => {

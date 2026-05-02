@@ -70,15 +70,13 @@ export const updateTeamService = async (
   return team;
 };
 
-export const deleteTeamService = async (id: string): Promise<ITeam> => {
+export const deleteTeamService = async (id: string): Promise<void> => {
   const existing = await teamRepository.findById(id);
 
   if (!existing) {
     throw new NotFoundError("Team not found");
   }
-  const team = await teamRepository.delete(id);
-
-  return team;
+  await teamRepository.delete(id);
 };
 
 export const countTeamService = async (): Promise<number> => {
