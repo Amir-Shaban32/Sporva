@@ -55,6 +55,10 @@ class MatchEventRepository {
     });
   }
 
+  async findById(id: string) {
+    return await prisma.match_Events.findUnique({ where: { id } });
+  }
+
   async findByMatch(match_id: string) {
     return await prisma.match_Events.findMany({ where: { match_id } });
   }
