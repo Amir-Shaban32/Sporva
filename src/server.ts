@@ -1,16 +1,19 @@
-import "dotenv/config";
+import "./config/env.config";
 import app from "./app";
-
-const PORT = process.env.PORT || 3000;
-
+import { logger } from "./config";
+import { env } from "./config";
+import { prisma } from "./lib/prisma";
 const startServer = async () => {
   try {
-    app.listen(PORT, () =>
-      console.log(`server is running on http://localhost:${PORT}/`),
+    prisma.$connect();
+    logger.info("Database connected successfully");
+
+    app.listen(env.PORT, () =>
+      logger.info(`server is running on http://localhost:${env.PORT}/`),
     );
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
-    console.error("Failed to connect to DB", err);
+    logger.error(err);
     process.exit(1);
   }
 };
