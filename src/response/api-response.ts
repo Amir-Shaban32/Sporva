@@ -19,13 +19,18 @@ export class ApiResponse {
     };
   }
 
-  static formatError(message: string, errors?: unknown): ApiErrorShape {
+  static formatError(
+    message: string,
+    errors?: unknown,
+    requestId?: string,
+  ): ApiErrorShape {
     return {
       success: false,
       error: {
         message,
         ...(errors !== undefined && { errors }),
       },
+      ...(requestId !== undefined && { requestId }),
       timestamp: new Date().toISOString(),
     };
   }
