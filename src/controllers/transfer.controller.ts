@@ -20,7 +20,10 @@ export const createTransfer = catchAsync(
 export const getAllTrans = catchAsync(async (req: Request, res: Response) => {
   const { page, limit } = parsePagination(req);
 
-  const { transfers, total } = await getAllTransService(page, limit);
+  const result = await getAllTransService(page, limit);
+  if (!result) return res.noContent();
+
+  const { transfers, total } = result;
 
   return res.paginated(
     transfers,
@@ -39,6 +42,8 @@ export const getTransfersByPlayer = catchAsync(
     }
 
     const transfers = await getTransfersByPlayerService(playerId as string);
+    if (!transfers) return res.noContent();
+
     return res.ok("Transfers retrieved successfully", { transfers });
   },
 );
@@ -51,6 +56,8 @@ export const getTransfersByTeam = catchAsync(
     }
 
     const transfers = await getTransfersByTeamService(teamId as string);
+    if (!transfers) return res.noContent();
+
     return res.ok("Transfers retrieved successfully", { transfers });
   },
 );

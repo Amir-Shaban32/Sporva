@@ -27,8 +27,10 @@ export const createPlayer = catchAsync(async (req: Request, res: Response) => {
 export const getAllPlayers = catchAsync(async (req: Request, res: Response) => {
   const { page, limit } = parsePagination(req);
 
-  const { players, total } = await getAllPlayersService(page, limit);
+  const result = await getAllPlayersService(page, limit);
+  if (!result) return res.noContent();
 
+  const { players, total } = result;
   return res.paginated(
     players,
     total,
@@ -49,6 +51,7 @@ export const getPlayerByName = catchAsync(
       f_name: f_name as string,
       l_name: l_name as string,
     });
+    if (!players) return res.noContent();
 
     return res.ok("Players retrieved successfully", { players });
   },
@@ -73,6 +76,7 @@ export const getPlayerByTeam = catchAsync(
     }
 
     const players = await getPlayerByTeamService(teamId as string);
+    if (!players) return res.noContent();
 
     return res.ok("Players retrieved successfully", { players });
   },
@@ -86,6 +90,7 @@ export const getPlayerByPosition = catchAsync(
     }
 
     const players = await getPlayerByPositionService(position as Positions);
+    if (!players) return res.noContent();
 
     return res.ok("Players retrieved successfully", { players });
   },
@@ -99,6 +104,7 @@ export const getPlayerByNationality = catchAsync(
     }
 
     const players = await getPlayerByNationalityService(nationality as string);
+    if (!players) return res.noContent();
 
     return res.ok("Players retrieved successfully", { players });
   },

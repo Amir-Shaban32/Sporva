@@ -58,7 +58,10 @@ export const getUserByEmail = catchAsync(
 export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const { page, limit } = parsePagination(req);
 
-  const { users, total } = await getAllUsersService(page, limit);
+  const result = await getAllUsersService(page, limit);
+  if (!result) return res.noContent();
+
+  const { users, total } = result;
   return res.paginated(
     users,
     total,

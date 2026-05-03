@@ -25,10 +25,10 @@ export const getAllPlayerContracts = catchAsync(
   async (req: Request, res: Response) => {
     const { page, limit } = parsePagination(req);
 
-    const { playerContracts, total } = await getAllPlayerContractsService(
-      page,
-      limit,
-    );
+    const result = await getAllPlayerContractsService(page, limit);
+    if (!result) return res.noContent();
+
+    const { playerContracts, total } = result;
 
     return res.paginated(
       playerContracts,
@@ -43,6 +43,8 @@ export const getAllPlayerContracts = catchAsync(
 export const getActivePlayerContracts = catchAsync(
   async (_req: Request, res: Response) => {
     const contracts = await getActivePlayerContractsService();
+    if (!contracts) return res.noContent();
+
     return res.ok("Active player contracts retrieved successfully", {
       contracts,
     });
@@ -52,6 +54,8 @@ export const getActivePlayerContracts = catchAsync(
 export const getExpiredPlayerContracts = catchAsync(
   async (_req: Request, res: Response) => {
     const contracts = await getExpiredPlayerContractsService();
+    if (!contracts) return res.noContent();
+
     return res.ok("Expired player contracts retrieved successfully", {
       contracts,
     });
@@ -68,6 +72,8 @@ export const getPlayerContractsByPlayer = catchAsync(
     const contracts = await getPlayerContractsByPlayerService(
       playerId as string,
     );
+    if (!contracts) return res.noContent();
+
     return res.ok("Player contracts retrieved successfully", { contracts });
   },
 );
@@ -92,6 +98,8 @@ export const getPlayerContractsByInterval = catchAsync(
     }
 
     const contracts = await getPlayerContractsByIntervalService(period);
+    if (!contracts) return res.noContent();
+
     return res.ok("Player contracts retrieved successfully", { contracts });
   },
 );

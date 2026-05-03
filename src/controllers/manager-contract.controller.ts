@@ -25,10 +25,10 @@ export const getAllManagerContracts = catchAsync(
   async (req: Request, res: Response) => {
     const { page, limit } = parsePagination(req);
 
-    const { managerContracts, total } = await getAllManagerContractsService(
-      page,
-      limit,
-    );
+    const result = await getAllManagerContractsService(page, limit);
+    if (!result) return res.noContent();
+
+    const { managerContracts, total } = result;
 
     return res.paginated(
       managerContracts,
@@ -43,6 +43,8 @@ export const getAllManagerContracts = catchAsync(
 export const getActiveManagerContracts = catchAsync(
   async (_req: Request, res: Response) => {
     const contracts = await getActiveManagerContractsService();
+    if (!contracts) return res.noContent();
+
     return res.ok("Active manager contracts retrieved successfully", {
       contracts,
     });
@@ -52,6 +54,8 @@ export const getActiveManagerContracts = catchAsync(
 export const getExpiredManagerContracts = catchAsync(
   async (_req: Request, res: Response) => {
     const contracts = await getExpiredManagerContractsService();
+    if (!contracts) return res.noContent();
+
     return res.ok("Expired manager contracts retrieved successfully", {
       contracts,
     });
@@ -68,6 +72,8 @@ export const getManagerContractsByManager = catchAsync(
     const contracts = await getManagerContractsByManagerService(
       managerId as string,
     );
+    if (!contracts) return res.noContent();
+
     return res.ok("Manager contracts retrieved successfully", { contracts });
   },
 );
@@ -92,6 +98,8 @@ export const getManagerContractsByInterval = catchAsync(
     }
 
     const contracts = await getManagerContractsByIntervalService(period);
+    if (!contracts) return res.noContent();
+
     return res.ok("Manager contracts retrieved successfully", { contracts });
   },
 );

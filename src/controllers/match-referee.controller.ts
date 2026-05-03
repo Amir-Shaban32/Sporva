@@ -25,6 +25,8 @@ export const getMatchByReferee = catchAsync(
     }
 
     const assignments = await getMatchesByRefereeService(refereeId as string);
+    if (!assignments) return res.noContent();
+
     return res.ok("Matches retrieved successfully", { assignments });
   },
 );

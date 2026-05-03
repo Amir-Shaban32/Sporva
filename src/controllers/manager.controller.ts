@@ -23,7 +23,10 @@ export const getAllManagers = catchAsync(
   async (req: Request, res: Response) => {
     const { page, limit } = parsePagination(req);
 
-    const { managers, total } = await getAllManagersService(page, limit);
+    const result = await getAllManagersService(page, limit);
+    if (!result) return res.noContent();
+
+    const { managers, total } = result;
 
     return res.paginated(
       managers,
@@ -56,6 +59,7 @@ export const getManagerByName = catchAsync(
       f_name: f_name as string,
       l_name: l_name as string,
     });
+    if (!managers) return res.noContent();
 
     return res.ok("Managers retrieved successfully", { managers });
   },
@@ -71,6 +75,8 @@ export const getManagerByNationality = catchAsync(
     const managers = await getManagerByNationalityService(
       nationality as string,
     );
+    if (!managers) return res.noContent();
+
     return res.ok("Managers retrieved successfully", { managers });
   },
 );

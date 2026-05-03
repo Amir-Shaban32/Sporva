@@ -24,6 +24,8 @@ export const getMatchEventsByMatch = catchAsync(
       throw new BadRequestError("Bad request! Match ID is required");
     }
     const events = await getMatchEventsByMatchService(matchId as string);
+    if (!events) return res.noContent();
+
     return res.ok("Match events retrieved successfully", { events });
   },
 );
@@ -36,6 +38,8 @@ export const getMatchEventsByType = catchAsync(
     }
 
     const events = await getMatchEventsByTypeService(eventType as Event_types);
+    if (!events) return res.noContent();
+
     return res.ok("Match events retrieved successfully", { events });
   },
 );
@@ -48,6 +52,8 @@ export const getMatchEventsByPlayer = catchAsync(
     }
 
     const events = await getMatchEventsByPlayerService(playerId as string);
+    if (!events) return res.noContent();
+
     return res.ok("Match events retrieved successfully", { events });
   },
 );

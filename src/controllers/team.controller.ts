@@ -21,7 +21,10 @@ export const createTeam = catchAsync(async (req: Request, res: Response) => {
 export const getAllTeams = catchAsync(async (req: Request, res: Response) => {
   const { page, limit } = parsePagination(req);
 
-  const { teams, total } = await getAllTeamsService(page, limit);
+  const result = await getAllTeamsService(page, limit);
+  if (!result) return res.noContent();
+
+  const { teams, total } = result;
 
   return res.paginated(
     teams,
@@ -59,6 +62,7 @@ export const getTeamByCity = catchAsync(async (req: Request, res: Response) => {
   }
 
   const teams = await getTeamByCityService(city as string);
+  if (!teams) return res.noContent();
   return res.ok("Teams retrieved successfully", { teams });
 });
 

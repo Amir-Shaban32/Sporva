@@ -30,6 +30,8 @@ export const getMatchByTeam = catchAsync(
     }
 
     const matches = await getMatchByTeamService(teamId as string);
+    if (!matches) return res.noContent();
+
     return res.ok("Matches retrieved successfully", { matches });
   },
 );
@@ -37,6 +39,8 @@ export const getMatchByTeam = catchAsync(
 export const getLiveMatches = catchAsync(
   async (_req: Request, res: Response) => {
     const matches = await getLiveMatchesService();
+    if (!matches) return res.noContent();
+
     return res.ok("Live matches retrieved successfully", { matches });
   },
 );
@@ -49,6 +53,8 @@ export const getMatchesByStatus = catchAsync(
     }
 
     const matches = await getMatchesByStatusService(status as Match_status);
+    if (!matches) return res.noContent();
+
     return res.ok("Matches retrieved successfully", { matches });
   },
 );
@@ -63,6 +69,8 @@ export const getMatchesByCompetition = catchAsync(
     const matches = await getMatchesByCompetitionService(
       competition as Competitions,
     );
+    if (!matches) return res.noContent();
+
     return res.ok("Matches retrieved successfully", { matches });
   },
 );
@@ -75,6 +83,8 @@ export const getMatchesBySeasonEndpoint = catchAsync(
     }
 
     const matches = await getMatchesBySeason(season as string);
+    if (!matches) return res.noContent();
+
     return res.ok("Matches retrieved successfully", { matches });
   },
 );
@@ -87,6 +97,8 @@ export const getMatchesByDate = catchAsync(
     }
 
     const matches = await getMatchesByDateService(new Date(date as string));
+    if (!matches) return res.noContent();
+
     return res.ok("Matches retrieved successfully", { matches });
   },
 );
@@ -99,6 +111,8 @@ export const getMatchesByRound = catchAsync(
     }
 
     const matches = await getMatchesByRoundService(parseInt(round as string));
+    if (!matches) return res.noContent();
+
     return res.ok("Matches retrieved successfully", { matches });
   },
 );
@@ -106,6 +120,8 @@ export const getMatchesByRound = catchAsync(
 export const getMatchesWithExtraTime = catchAsync(
   async (_req: Request, res: Response) => {
     const matches = await getMatchesWithExtraTimeService();
+    if (!matches) return res.noContent();
+
     return res.ok("Matches with extra time retrieved successfully", {
       matches,
     });
@@ -115,6 +131,8 @@ export const getMatchesWithExtraTime = catchAsync(
 export const getMatchesWithPenalties = catchAsync(
   async (_req: Request, res: Response) => {
     const matches = await getMatchesWithPenaltiesService();
+    if (!matches) return res.noContent();
+
     return res.ok("Matches with penalties retrieved successfully", { matches });
   },
 );

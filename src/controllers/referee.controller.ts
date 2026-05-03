@@ -23,7 +23,10 @@ export const getAllReferees = catchAsync(
   async (req: Request, res: Response) => {
     const { page, limit } = parsePagination(req);
 
-    const { referees, total } = await getAllRefereesService(page, limit);
+    const result = await getAllRefereesService(page, limit);
+    if (!result) return res.noContent();
+
+    const { referees, total } = result;
 
     return res.paginated(
       referees,
@@ -58,6 +61,8 @@ export const getRefereeByName = catchAsync(
       f_name: f_name as string,
       l_name: l_name as string,
     });
+    if (!referees) return res.noContent();
+
     return res.ok("Referees retrieved successfully", { referees });
   },
 );
@@ -72,6 +77,8 @@ export const getRefereeByNationality = catchAsync(
     const referees = await getRefereeByNationalityService(
       nationality as string,
     );
+    if (!referees) return res.noContent();
+
     return res.ok("Referees retrieved successfully", { referees });
   },
 );
@@ -84,6 +91,8 @@ export const getRefereesByMatch = catchAsync(
     }
 
     const referees = await getRefereesByMatchService(match_id as string);
+    if (!referees) return res.noContent();
+
     return res.ok("Referees retrieved successfully", { referees });
   },
 );
