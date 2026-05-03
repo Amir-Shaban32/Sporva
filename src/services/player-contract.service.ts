@@ -34,7 +34,7 @@ export const createPlayerContractService = async (
 export const getAllPlayerContractsService = async (
   page: number = 1,
   limit: number = 10,
-): Promise<{ playerContracts: IPlayerContract[]; total: number }> => {
+): Promise<{ playerContracts: IPlayerContract[]; total: number } | null> => {
   const total = await playerContractRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
@@ -44,43 +44,35 @@ export const getAllPlayerContractsService = async (
   }
 
   const playerContracts = await playerContractRepository.findAll(page, limit);
-  if (!playerContracts.length) {
-    throw new NotFoundError("No Player Contracts found!");
-  }
+  if (!playerContracts.length) return null;
   return { playerContracts, total };
 };
 
 export const getActivePlayerContractsService = async (): Promise<
-  IPlayerContract[]
+  IPlayerContract[] | null
 > => {
   const contracts = await playerContractRepository.findActiveContracts();
-  if (!contracts.length) {
-    throw new NotFoundError("No active contracts found");
-  }
+  if (!contracts.length) return null;
   return contracts;
 };
 
 export const getExpiredPlayerContractsService = async (): Promise<
-  IPlayerContract[]
+  IPlayerContract[] | null
 > => {
   const contracts = await playerContractRepository.findExpiredContracts();
-  if (!contracts.length) {
-    throw new NotFoundError("No expired contracts found");
-  }
+  if (!contracts.length) return null;
   return contracts;
 };
 
 export const getPlayerContractsByPlayerService = async (
   player_id: string,
-): Promise<IPlayerContract[]> => {
+): Promise<IPlayerContract[] | null> => {
   const player = await playerRepository.findById(player_id);
   if (!player) {
     throw new NotFoundError("Player not found");
   }
   const contracts = await playerContractRepository.findByPlayer(player_id);
-  if (!contracts.length) {
-    throw new NotFoundError("No contracts found");
-  }
+  if (!contracts.length) return null;
   return contracts;
 };
 
@@ -93,11 +85,9 @@ export const deActivatePlayerContractService = async (
 
 export const getPlayerContractsByIntervalService = async (
   period: number,
-): Promise<IPlayerContract[]> => {
+): Promise<IPlayerContract[] | null> => {
   const contracts = await playerContractRepository.findByInterval(period);
-  if (!Array.isArray(contracts) || contracts.length === 0) {
-    throw new NotFoundError("No contracts found");
-  }
+  if (!Array.isArray(contracts) || contracts.length === 0) return null;
   return contracts as IPlayerContract[];
 };
 

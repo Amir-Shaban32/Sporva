@@ -16,7 +16,7 @@ export const createTeamService = async (data: ICreateTeam): Promise<ITeam> => {
 export const getAllTeamsService = async (
   page: number = 1,
   limit: number = 10,
-): Promise<{ teams: ITeam[]; total: number }> => {
+): Promise<{ teams: ITeam[]; total: number } | null> => {
   const total = await teamRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
@@ -26,9 +26,7 @@ export const getAllTeamsService = async (
   }
 
   const teams = await teamRepository.findAll(page, limit);
-  if (!teams.length) {
-    throw new NotFoundError("No Teams found!");
-  }
+  if (!teams.length) return null;
   return { teams, total };
 };
 
@@ -48,11 +46,11 @@ export const getTeamByNameService = async (name: string): Promise<ITeam> => {
   return existing;
 };
 
-export const getTeamByCityService = async (city: string): Promise<ITeam[]> => {
+export const getTeamByCityService = async (
+  city: string,
+): Promise<ITeam[] | null> => {
   const teams = await teamRepository.findByCity(city);
-  if (!teams.length) {
-    throw new NotFoundError("No Teams found");
-  }
+  if (!teams.length) return null;
   return teams;
 };
 

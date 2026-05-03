@@ -32,7 +32,7 @@ export const createManagerContractService = async (
 export const getAllManagerContractsService = async (
   page: number = 1,
   limit: number = 10,
-): Promise<{ managerContracts: IManagerContract[]; total: number }> => {
+): Promise<{ managerContracts: IManagerContract[]; total: number } | null> => {
   const total = await managerContractRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
@@ -41,39 +41,31 @@ export const getAllManagerContractsService = async (
     );
   }
   const managerContracts = await managerContractRepository.findAll(page, limit);
-  if (!managerContracts.length) {
-    throw new NotFoundError("No Manager contracts found!");
-  }
+  if (!managerContracts.length) return null;
   return { managerContracts, total };
 };
 
 export const getActiveManagerContractsService = async (): Promise<
-  IManagerContract[]
+  IManagerContract[] | null
 > => {
   const contracts = await managerContractRepository.findActiveContracts();
-  if (!contracts.length) {
-    throw new NotFoundError("No active contracts found");
-  }
+  if (!contracts.length) return null;
   return contracts;
 };
 
 export const getExpiredManagerContractsService = async (): Promise<
-  IManagerContract[]
+  IManagerContract[] | null
 > => {
   const contracts = await managerContractRepository.findExpiredContracts();
-  if (!contracts.length) {
-    throw new NotFoundError("No expired contracts found");
-  }
+  if (!contracts.length) return null;
   return contracts;
 };
 
 export const getManagerContractsByManagerService = async (
   manager_id: string,
-): Promise<IManagerContract[]> => {
+): Promise<IManagerContract[] | null> => {
   const contracts = await managerContractRepository.findByManager(manager_id);
-  if (!contracts.length) {
-    throw new NotFoundError("No contracts found");
-  }
+  if (!contracts.length) return null;
   return contracts;
 };
 
@@ -86,11 +78,9 @@ export const deActivateManagerContractService = async (
 
 export const getManagerContractsByIntervalService = async (
   period: number,
-): Promise<IManagerContract[]> => {
+): Promise<IManagerContract[] | null> => {
   const contracts = await managerContractRepository.findByInterval(period);
-  if (!Array.isArray(contracts) || contracts.length === 0) {
-    throw new NotFoundError("No contracts found");
-  }
+  if (!Array.isArray(contracts) || contracts.length === 0) return null;
   return contracts as IManagerContract[];
 };
 

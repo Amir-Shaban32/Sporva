@@ -2,13 +2,12 @@ import {
   matchEventRepository,
   matchRepository,
   playerRepository,
-  teamRepository,
 } from "../repositories";
 import { IMatchEvent, ICreateMatchEvent } from "../types";
 import { Event_types } from "../../generated/prisma";
-import { NotFoundError, UnprocessableEntityError } from "../errors/app-error";
-import { checkValidCreateMatchEvent } from "src/utils/check-create-event";
-import { logger } from "src/config";
+import { NotFoundError } from "../errors/app-error";
+import { checkValidCreateMatchEvent } from "../utils/check-create-event";
+import { logger } from "../config";
 
 export const createMatchEventService = async (
   data: ICreateMatchEvent,
@@ -60,31 +59,25 @@ export const getMatchEventByIdService = async (
 
 export const getMatchEventsByMatchService = async (
   match_id: string,
-): Promise<IMatchEvent[]> => {
+): Promise<IMatchEvent[] | null> => {
   const events = await matchEventRepository.findByMatch(match_id);
-  if (!events.length) {
-    throw new NotFoundError("No events found");
-  }
+  if (!events.length) return null;
   return events;
 };
 
 export const getMatchEventsByTypeService = async (
   event_type: Event_types,
-): Promise<IMatchEvent[]> => {
+): Promise<IMatchEvent[] | null> => {
   const events = await matchEventRepository.findByEvent(event_type);
-  if (!events.length) {
-    throw new NotFoundError("No events found");
-  }
+  if (!events.length) return null;
   return events;
 };
 
 export const getMatchEventsByPlayerService = async (
   player_id: string,
-): Promise<IMatchEvent[]> => {
+): Promise<IMatchEvent[] | null> => {
   const events = await matchEventRepository.findByPlayer(player_id);
-  if (!events.length) {
-    throw new NotFoundError("No events found");
-  }
+  if (!events.length) return null;
   return events;
 };
 

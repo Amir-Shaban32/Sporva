@@ -22,7 +22,7 @@ export const createRefereeService = async (
 export const getAllRefereesService = async (
   page: number = 1,
   limit: number = 10,
-): Promise<{ referees: IReferee[]; total: number }> => {
+): Promise<{ referees: IReferee[]; total: number } | null> => {
   const total = await refereeRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
@@ -32,9 +32,7 @@ export const getAllRefereesService = async (
   }
 
   const referees = await refereeRepository.findAll(page, limit);
-  if (!referees.length) {
-    throw new NotFoundError("No Referees found!");
-  }
+  if (!referees.length) return null;
   return { referees, total };
 };
 
@@ -48,21 +46,19 @@ export const getRefereeByIdService = async (id: string): Promise<IReferee> => {
 
 export const getRefereeByNameService = async (
   name: RefereeSearchInput,
-): Promise<IReferee[]> => {
-  const existing = await refereeRepository.findByName(name);
-  if (!existing) {
-    throw new NotFoundError("Not found!");
-  }
-  return existing;
+): Promise<IReferee[] | null> => {
+  const referees = await refereeRepository.findByName(name);
+  if (!referees.length) return null;
+
+  return referees;
 };
 
 export const getRefereeByNationalityService = async (
   nationality: string,
-): Promise<IReferee[]> => {
+): Promise<IReferee[] | null> => {
   const referees = await refereeRepository.findByNationality(nationality);
-  if (!referees.length) {
-    throw new NotFoundError("No Referees found");
-  }
+  if (!referees.length) return null;
+
   return referees;
 };
 

@@ -50,18 +50,17 @@ export const createTransferService = async (
 
 export const getTransfersByPlayerService = async (
   player_id: string,
-): Promise<ITransfer[]> => {
+): Promise<ITransfer[] | null> => {
   const transfers = await transferRepository.findByPlayer(player_id);
-  if (!transfers.length) {
-    throw new NotFoundError("No transfers found");
-  }
+  if (!transfers.length) return null;
+
   return transfers;
 };
 
 export const getAllTransService = async (
   page: number = 1,
   limit: number = 10,
-): Promise<{ transfers: ITransfer[]; total: number }> => {
+): Promise<{ transfers: ITransfer[]; total: number } | null> => {
   const total = await transferRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
@@ -70,20 +69,17 @@ export const getAllTransService = async (
     );
   }
   const transfers = await transferRepository.findAll(page, limit);
-  if (!transfers.length) {
-    throw new NotFoundError("No Transfers found!");
-  }
+  if (!transfers.length) return null;
 
   return { transfers, total };
 };
 
 export const getTransfersByTeamService = async (
   team_id: string,
-): Promise<ITransfer[]> => {
+): Promise<ITransfer[] | null> => {
   const transfers = await transferRepository.findByTeam(team_id);
-  if (!transfers.length) {
-    throw new NotFoundError("No transfers found");
-  }
+  if (!transfers.length) return null;
+
   return transfers;
 };
 

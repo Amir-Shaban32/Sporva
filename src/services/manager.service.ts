@@ -22,7 +22,7 @@ export const createManagerService = async (
 export const getAllManagersService = async (
   page: number = 1,
   limit: number = 10,
-): Promise<{ managers: IManager[]; total: number }> => {
+): Promise<{ managers: IManager[]; total: number } | null> => {
   const total = await managerRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
@@ -31,9 +31,8 @@ export const getAllManagersService = async (
     );
   }
   const managers = await managerRepository.findAll(page, limit);
-  if (!managers.length) {
-    throw new NotFoundError("No Managers found!");
-  }
+  if (!managers.length) return null;
+
   return { managers, total };
 };
 
@@ -47,21 +46,18 @@ export const getManagerByIdService = async (id: string): Promise<IManager> => {
 
 export const getManagerByNameService = async (
   name: ManagerSearchInput,
-): Promise<IManager[]> => {
+): Promise<IManager[] | null> => {
   const managers = await managerRepository.findByName(name);
-  if (!managers.length) {
-    throw new NotFoundError("No managers found");
-  }
+  if (!managers.length) return null;
+
   return managers;
 };
 
 export const getManagerByNationalityService = async (
   nationality: string,
-): Promise<IManager[]> => {
+): Promise<IManager[] | null> => {
   const managers = await managerRepository.findByNationality(nationality);
-  if (!managers.length) {
-    throw new NotFoundError("No managers found");
-  }
+  if (!managers.length) return null;
   return managers;
 };
 

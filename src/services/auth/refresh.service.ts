@@ -9,6 +9,7 @@ import {
 } from "./refresh-token.service";
 import { ForbiddenError, UnauthorizedError } from "../../errors/app-error";
 import { verifyRefreshToken } from "../../utils/verify-token";
+import { logger } from "../../config";
 
 export const refreshTokenService = async (
   input: RefreshTokenInput,
@@ -53,4 +54,12 @@ const handlePossibleTokenReuse = async (cookieToken: string): Promise<void> => {
   const payload = await verifyRefreshToken(cookieToken);
   const hackedUser = await getUserByUsernameService(payload.userInfo.username);
   await revokeAllUserTokensService(hackedUser.id);
+
+  logger.warn(
+    {
+      user_id: hackedUser.id,
+      username: hackedUser.username,
+    },
+    "Refresh token reuse detected — all tokens revoked",
+  );
 };

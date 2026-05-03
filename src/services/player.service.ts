@@ -25,7 +25,7 @@ export const createPlayerService = async (
 export const getAllPlayersService = async (
   page: number = 1,
   limit: number = 10,
-): Promise<{ players: IPlayer[]; total: number }> => {
+): Promise<{ players: IPlayer[]; total: number } | null> => {
   const total = await playerRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
@@ -35,19 +35,17 @@ export const getAllPlayersService = async (
   }
 
   const players = await playerRepository.findAll(page, limit);
-  if (!players.length) {
-    throw new NotFoundError("No Players found!");
-  }
+  if (!players.length) return null;
+
   return { players, total };
 };
 
 export const getPlayerByNameService = async (
   name: PlayerSearchInput,
-): Promise<IPlayer[]> => {
+): Promise<IPlayer[] | null> => {
   const players = await playerRepository.findByName(name);
-  if (!players.length) {
-    throw new NotFoundError("No players found");
-  }
+  if (!players.length) return null;
+
   return players;
 };
 
@@ -61,31 +59,28 @@ export const getPlayerByIdService = async (id: string): Promise<IPlayer> => {
 
 export const getPlayerByTeamService = async (
   team_id: string,
-): Promise<IPlayer[]> => {
+): Promise<IPlayer[] | null> => {
   const players = await playerRepository.findByTeam(team_id);
-  if (!players.length) {
-    throw new NotFoundError("No players found");
-  }
+  if (!players.length) return null;
+
   return players;
 };
 
 export const getPlayerByPositionService = async (
   position: Positions,
-): Promise<IPlayer[]> => {
+): Promise<IPlayer[] | null> => {
   const players = await playerRepository.findByPosition(position);
-  if (!players.length) {
-    throw new NotFoundError("No players found");
-  }
+  if (!players.length) return null;
+
   return players;
 };
 
 export const getPlayerByNationalityService = async (
   nationality: string,
-): Promise<IPlayer[]> => {
+): Promise<IPlayer[] | null> => {
   const players = await playerRepository.findByNationality(nationality);
-  if (!players.length) {
-    throw new NotFoundError("No players found");
-  }
+  if (!players.length) return null;
+
   return players;
 };
 

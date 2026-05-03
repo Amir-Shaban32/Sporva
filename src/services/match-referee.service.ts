@@ -9,7 +9,7 @@ import {
   ConflictError,
   UnprocessableEntityError,
 } from "../errors/app-error";
-import { Match_status } from "generated/prisma";
+import { Match_status } from "../../generated/prisma";
 
 export const assignRefereeToMatchService = async (
   data: ICreateMatchReferee,
@@ -54,21 +54,17 @@ export const assignRefereeToMatchService = async (
 
 export const getRefereesByMatchService = async (
   match_id: string,
-): Promise<IMatchReferee[]> => {
+): Promise<IMatchReferee[] | null> => {
   const referees = await matchRefereeRepository.findByMatch(match_id);
-  if (!referees.length) {
-    throw new NotFoundError("No referees found");
-  }
+  if (!referees.length) return null;
   return referees;
 };
 
 export const getMatchesByRefereeService = async (
   referee_id: string,
-): Promise<IMatchReferee[]> => {
+): Promise<IMatchReferee[] | null> => {
   const matches = await matchRefereeRepository.findByReferee(referee_id);
-  if (!matches.length) {
-    throw new NotFoundError("No matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
 

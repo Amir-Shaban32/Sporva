@@ -6,7 +6,7 @@ import {
   NotFoundError,
   BadRequestError,
 } from "../errors/app-error";
-import { hashPassword } from "src/utils/password";
+import { hashPassword } from "../utils/password";
 
 export const createUserService = async (data: ICreateUser): Promise<IUser> => {
   const existing = await userRepository.findByUsername(data.username);
@@ -55,7 +55,7 @@ export const getUserByEmailService = async (email: string): Promise<IUser> => {
 export const getAllUsersService = async (
   page: number = 1,
   limit: number = 10,
-): Promise<{ users: IUser[]; total: number }> => {
+): Promise<{ users: IUser[]; total: number } | null> => {
   const total = await userRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
@@ -65,9 +65,7 @@ export const getAllUsersService = async (
   }
 
   const users = await userRepository.findAll(page, limit);
-  if (!users.length) {
-    throw new NotFoundError("No users found");
-  }
+  if (!users.length) return null;
   return { users, total };
 };
 

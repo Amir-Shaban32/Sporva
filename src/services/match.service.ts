@@ -9,7 +9,7 @@ import {
 import { checkValidUpdateMatch } from "../utils/check-update-match";
 import { computeMatchDeltas } from "../utils/compute-match-deltas";
 import { checkValidRecordResult } from "../utils/check-valid-result";
-import { prisma } from "src/lib/prisma";
+import { prisma } from "../lib/prisma";
 import { logger } from "../config";
 
 export const scheduleMatchService = async (
@@ -41,49 +41,41 @@ export const scheduleMatchService = async (
 
 export const getMatchByTeamService = async (
   team_id: string,
-): Promise<IMatch[]> => {
+): Promise<IMatch[] | null> => {
   const matches = await matchRepository.findByTeam(team_id);
-  if (!matches.length) {
-    throw new NotFoundError("No matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
 
-export const getLiveMatchesService = async (): Promise<IMatch[]> => {
+export const getLiveMatchesService = async (): Promise<IMatch[] | null> => {
   const matches = await matchRepository.findLive();
-  if (!matches.length) {
-    throw new NotFoundError("No live matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
 
 export const getMatchesByStatusService = async (
   status: Match_status,
-): Promise<IMatch[]> => {
+): Promise<IMatch[] | null> => {
   const normalizedStatus = status.toUpperCase() as Match_status;
   const matches = await matchRepository.findByStatus(normalizedStatus);
-  if (!matches.length) {
-    throw new NotFoundError("No matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
 
 export const getMatchesByCompetitionService = async (
   competition: Competitions,
-): Promise<IMatch[]> => {
+): Promise<IMatch[] | null> => {
   const normalizedComp = competition.toUpperCase() as Competitions;
   const matches = await matchRepository.findByComp(normalizedComp);
-  if (!matches.length) {
-    throw new NotFoundError("No matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
 
-export const getMatchesBySeason = async (season: string): Promise<IMatch[]> => {
+export const getMatchesBySeason = async (
+  season: string,
+): Promise<IMatch[] | null> => {
   const matches = await matchRepository.findBySeason(season);
-  if (!matches.length) {
-    throw new NotFoundError("No matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
 
@@ -148,36 +140,32 @@ export const recordMatchResultService = async (id: string): Promise<void> => {
 
 export const getMatchesByDateService = async (
   date: Date,
-): Promise<IMatch[]> => {
+): Promise<IMatch[] | null> => {
   const matches = await matchRepository.findByDate(date);
-  if (!matches.length) {
-    throw new NotFoundError("No matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
 
 export const getMatchesByRoundService = async (
   round: number,
-): Promise<IMatch[]> => {
+): Promise<IMatch[] | null> => {
   const matches = await matchRepository.findByRound(round);
-  if (!matches.length) {
-    throw new NotFoundError("No matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
 
-export const getMatchesWithExtraTimeService = async (): Promise<IMatch[]> => {
+export const getMatchesWithExtraTimeService = async (): Promise<
+  IMatch[] | null
+> => {
   const matches = await matchRepository.findGotExtra();
-  if (!matches.length) {
-    throw new NotFoundError("No matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
 
-export const getMatchesWithPenaltiesService = async (): Promise<IMatch[]> => {
+export const getMatchesWithPenaltiesService = async (): Promise<
+  IMatch[] | null
+> => {
   const matches = await matchRepository.findGotPenalties();
-  if (!matches.length) {
-    throw new NotFoundError("No matches found");
-  }
+  if (!matches.length) return null;
   return matches;
 };
