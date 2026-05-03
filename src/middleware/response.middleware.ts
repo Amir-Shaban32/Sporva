@@ -16,6 +16,8 @@ export const responseMiddleware = (
       .status(StatusCodes.CREATED)
       .json(ApiResponse.formatSuccess(data, message));
 
+  res.noContent = <T>() => res.status(StatusCodes.NO_CONTENT).send();
+
   res.paginated = <T>(
     items: T[],
     total: number,
