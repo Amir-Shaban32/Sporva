@@ -14,6 +14,8 @@ import {
   getMatchesWithExtraTimeService,
   getMatchesWithPenaltiesService,
   recordMatchResultService,
+  getMatchByIdService,
+  updateMatchStatusService,
 } from "../services";
 import { Match_status, Competitions } from "../../generated/prisma";
 
@@ -35,6 +37,13 @@ export const getMatchByTeam = catchAsync(
     return res.ok("Matches retrieved successfully", { matches });
   },
 );
+
+export const getMatchById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (!id) throw new BadRequestError("id is missing");
+  const match = await getMatchByIdService(id as string);
+  return res.ok("Match retrieved successfully", { match });
+});
 
 export const getLiveMatches = catchAsync(
   async (_req: Request, res: Response) => {
@@ -144,6 +153,16 @@ export const updateMatch = catchAsync(async (req: Request, res: Response) => {
   const match = await updateMatchService(id as string, req.body);
   return res.ok("Match updated successfully", { match });
 });
+
+export const updateMatchStatus = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    await updateMatchStatusService(id as string, status as Match_status);
+    return res.ok("Status updated successfully and reflected to league table");
+  },
+);
 
 export const recordMatchResult = catchAsync(
   async (req: Request, res: Response) => {
