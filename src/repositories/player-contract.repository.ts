@@ -1,5 +1,7 @@
 import { prisma } from "../lib/prisma";
 import { ICreatePlayerContract } from "../types";
+import { isPrismaError } from "../utils/check-prisma-error";
+import { NotFoundError } from "../errors/app-error";
 
 class PlayerContractRepository {
   async create(data: ICreatePlayerContract) {
@@ -13,6 +15,10 @@ class PlayerContractRepository {
         is_active: data?.is_active ?? true,
       },
     });
+  }
+
+  async findById(id: string) {
+    return await prisma.player_Contracts.findUnique({ where: { id } });
   }
 
   async findByPlayer(player_id: string) {
@@ -60,12 +66,19 @@ class PlayerContractRepository {
   }
 
   async deActivate(id: string) {
-    return await prisma.player_Contracts.update({
-      where: { id },
-      data: {
-        is_active: false,
-      },
-    });
+    try {
+      return await prisma.player_Contracts.update({
+        where: { id },
+        data: {
+          is_active: false,
+        },
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Player Contract not found");
+      }
+      throw error;
+    }
   }
 
   async count() {

@@ -1,5 +1,7 @@
 import { prisma } from "../lib/prisma";
 import { ICreateManagerContract } from "../types";
+import { isPrismaError } from "../utils/check-prisma-error";
+import { NotFoundError } from "../errors/app-error";
 
 class ManagerContractRepository {
   async create(data: ICreateManagerContract) {
@@ -13,6 +15,10 @@ class ManagerContractRepository {
         is_active: data?.is_active ?? true,
       },
     });
+  }
+
+  async findById(id: string) {
+    return await prisma.manager_Contracts.findUnique({ where: { id } });
   }
 
   async findAll(page: number = 1, limit: number = 10) {
@@ -60,12 +66,19 @@ class ManagerContractRepository {
   }
 
   async deActivate(id: string) {
-    return await prisma.manager_Contracts.update({
-      where: { id },
-      data: {
-        is_active: false,
-      },
-    });
+    try {
+      return await prisma.manager_Contracts.update({
+        where: { id },
+        data: {
+          is_active: false,
+        },
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Manager Contract not found");
+      }
+      throw error;
+    }
   }
 
   async count() {
