@@ -3,9 +3,9 @@ import { playerRepository } from "../repositories";
 import { PlayerSearchInput, IPlayer, ICreatePlayer } from "../types";
 import { Prisma } from "../../generated/prisma";
 import {
-  BadRequestError,
   ConflictError,
   NotFoundError,
+  UnprocessableEntityError,
 } from "../errors/app-error";
 import { checkValidUpdateMember } from "../utils/check-update-member";
 
@@ -30,7 +30,7 @@ export const getAllPlayersService = async (
   const total = await playerRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
-    throw new BadRequestError(
+    throw new UnprocessableEntityError(
       `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
     );
   }
@@ -101,11 +101,6 @@ export const updatePlayerService = async (
 };
 
 export const deletePlayerService = async (id: string): Promise<void> => {
-  const existing = await playerRepository.findById(id);
-
-  if (!existing) {
-    throw new NotFoundError("Player not found");
-  }
   await playerRepository.delete(id);
 };
 

@@ -1,8 +1,11 @@
 import { IReferee, ICreateReferee, RefereeSearchInput } from "../types";
 import { refereeRepository } from "../repositories";
 import { Prisma } from "../../generated/prisma";
-import { ConflictError, NotFoundError } from "../errors/app-error";
-import { BadRequestError } from "../errors/app-error";
+import {
+  ConflictError,
+  NotFoundError,
+  UnprocessableEntityError,
+} from "../errors/app-error";
 import { checkValidUpdateMember } from "../utils/check-update-member";
 
 export const createRefereeService = async (
@@ -27,7 +30,7 @@ export const getAllRefereesService = async (
   const total = await refereeRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
-    throw new BadRequestError(
+    throw new UnprocessableEntityError(
       `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
     );
   }
@@ -40,7 +43,7 @@ export const getAllRefereesService = async (
 export const getRefereeByIdService = async (id: string): Promise<IReferee> => {
   const existing = await refereeRepository.findById(id);
   if (!existing) {
-    throw new NotFoundError("Not found!");
+    throw new NotFoundError("Referee Not found!");
   }
   return existing;
 };
@@ -79,11 +82,6 @@ export const updateRefereeService = async (
 };
 
 export const deleteRefereeService = async (id: string): Promise<void> => {
-  const existing = await refereeRepository.findById(id);
-
-  if (!existing) {
-    throw new NotFoundError("Referee not found");
-  }
   await refereeRepository.delete(id);
 };
 

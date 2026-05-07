@@ -4,7 +4,7 @@ import { Prisma } from "../../generated/prisma";
 import {
   ConflictError,
   NotFoundError,
-  BadRequestError,
+  UnprocessableEntityError,
 } from "../errors/app-error";
 import { hashPassword } from "../utils/password";
 
@@ -59,7 +59,7 @@ export const getAllUsersService = async (
   const total = await userRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
-    throw new BadRequestError(
+    throw new UnprocessableEntityError(
       `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
     );
   }
@@ -73,19 +73,11 @@ export const updateUserService = async (
   id: string,
   data: Prisma.UserUpdateInput,
 ): Promise<IUser> => {
-  const existing = await userRepository.findById(id);
-  if (!existing) {
-    throw new NotFoundError("User not found");
-  }
   const user = await userRepository.update(id, data);
   return user;
 };
 
 export const deleteUserService = async (id: string): Promise<void> => {
-  const existing = await userRepository.findById(id);
-  if (!existing) {
-    throw new NotFoundError("User not found");
-  }
   await userRepository.delete(id);
 };
 

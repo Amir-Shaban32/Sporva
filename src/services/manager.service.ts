@@ -1,8 +1,11 @@
 import { managerRepository } from "../repositories";
 import { ManagerSearchInput, IManager, ICreateManager } from "../types";
 import { Prisma } from "../../generated/prisma";
-import { ConflictError, NotFoundError } from "../errors/app-error";
-import { BadRequestError } from "../errors/app-error";
+import {
+  ConflictError,
+  NotFoundError,
+  UnprocessableEntityError,
+} from "../errors/app-error";
 import { checkValidUpdateMember } from "../utils/check-update-member";
 
 export const createManagerService = async (
@@ -27,7 +30,7 @@ export const getAllManagersService = async (
   const total = await managerRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
-    throw new BadRequestError(
+    throw new UnprocessableEntityError(
       `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
     );
   }
@@ -78,11 +81,6 @@ export const updateManagerService = async (
 };
 
 export const deleteManagerService = async (id: string): Promise<void> => {
-  const existing = await managerRepository.findById(id);
-
-  if (!existing) {
-    throw new NotFoundError("Manager not found");
-  }
   await managerRepository.delete(id);
 };
 

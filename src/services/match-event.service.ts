@@ -17,7 +17,8 @@ export const createMatchEventService = async (
     playerRepository.findById(data.player_id),
     matchRepository.findById(data.match_id),
   ]);
-  if (!player || !match) throw new NotFoundError("Player or match not found");
+  if (!player) throw new NotFoundError("Player not found");
+  if (!match) throw new NotFoundError("Match not found");
   checkValidCreateMatchEvent(data, player, match);
 
   let event;
@@ -84,7 +85,5 @@ export const getMatchEventsByPlayerService = async (
 };
 
 export const deleteMatchEventService = async (id: string): Promise<void> => {
-  const event = await matchEventRepository.findById(id);
-  if (!event) throw new NotFoundError("No event found");
   await matchEventRepository.delete(id);
 };
