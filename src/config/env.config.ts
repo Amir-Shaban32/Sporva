@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { z } from "zod";
 import ms from "ms";
 
@@ -32,7 +33,7 @@ const MIN_1D = 24 * 60 * 60 * 1000;
 const MAX_30D = 30 * 24 * 60 * 60 * 1000;
 
 const envSchema = z
-  .strictObject({
+  .object({
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .optional()
@@ -88,8 +89,8 @@ if (!result.success) {
     string,
     string[] | undefined
   >;
-  for (const [field, messages] of Object.entries(fieldErrors)) {
-    console.error(`  ${field}: ${messages?.join(", ")}`);
+  for (const issue of result.error.issues) {
+    console.error(`  ${issue.path.join(".")}: ${issue.message}`);
   }
   process.exit(1);
 }
