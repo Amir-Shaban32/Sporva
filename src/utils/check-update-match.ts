@@ -1,6 +1,10 @@
 import { Prisma, Match_status, Competitions } from "generated/prisma";
 import { IMatch } from "../types";
-import { UnprocessableEntityError } from "../errors/app-error";
+import {
+  BadRequestError,
+  ConflictError,
+  UnprocessableEntityError,
+} from "../errors/app-error";
 
 export const checkValidUpdateMatch = (
   data: Prisma.MatchesUpdateInput,
@@ -10,9 +14,7 @@ export const checkValidUpdateMatch = (
   const host_id = data.host_team?.connect?.id ?? match.host_team_id;
 
   if (guest_id === host_id) {
-    throw new UnprocessableEntityError(
-      "Host and guest team cannot be the same",
-    );
+    throw new BadRequestError("Host and guest team cannot be the same");
   }
 
   const guest_score = data.guest_team_score ?? match.guest_team_score;
@@ -29,22 +31,22 @@ export const checkValidUpdateMatch = (
   const isRelevantComp = competition !== Competitions.LEAGUE;
 
   if (!isRelevantStatus && (guest_score != null || host_score != null)) {
-    throw new UnprocessableEntityError(
+    throw new ConflictError(
       `Score can only be set on LIVE or FINISHED matches. Current status: ${match.status}`,
     );
   }
   if (!isRelevantComp && (gotExtra || gotPenalties)) {
-    throw new UnprocessableEntityError(
+    throw new ConflictError(
       `This match in ${competition} You Can't set extra time or penalties`,
     );
   }
   if (!isRelevantStatus && gotExtra) {
-    throw new UnprocessableEntityError(
+    throw new ConflictError(
       `Extra time can only be set on LIVE or FINISHED matches. Current status: ${match.status}`,
     );
   }
   if (!isRelevantStatus && gotPenalties) {
-    throw new UnprocessableEntityError(
+    throw new ConflictError(
       `Penalties can only be set on LIVE or FINISHED matches. Current status: ${match.status}`,
     );
   }

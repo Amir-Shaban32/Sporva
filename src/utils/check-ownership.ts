@@ -1,6 +1,6 @@
-import { IUser } from "../types";
 import { Request } from "express";
-import { ForbiddenError } from "src/errors/app-error";
+import { IUser } from "../types";
+import { ForbiddenError } from "../errors/app-error";
 
 export const checkOwner = (user: IUser, req: Request) => {
   const userId = user.id;

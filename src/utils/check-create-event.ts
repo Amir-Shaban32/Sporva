@@ -1,5 +1,6 @@
 import { ICreateMatchEvent, IMatch, IPlayer } from "src/types";
 import { UnprocessableEntityError, NotFoundError } from "../errors/app-error";
+
 export const checkValidCreateMatchEvent = (
   data: ICreateMatchEvent,
   player: IPlayer,

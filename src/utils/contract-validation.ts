@@ -1,4 +1,4 @@
-import { BadRequestError } from "../errors/app-error";
+import { ConflictError } from "../errors/app-error";
 
 export const checkContractOverlap = (
   existingContracts: { id: string; start_date: Date; end_date: Date }[],
@@ -15,7 +15,7 @@ export const checkContractOverlap = (
   });
 
   if (overlapping)
-    throw new BadRequestError(
+    throw new ConflictError(
       `Contract overlaps with existing contract: ${overlapping.id}`,
     );
 };
