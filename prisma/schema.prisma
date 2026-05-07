@@ -49,24 +49,24 @@ model Managers {
 }
 
 model Teams {
-  id                 String              @id @default(cuid())
-  name               String              @unique
+  id                 String               @id @default(cuid())
+  name               String               @unique
   founded_year       Int
   city               String
   stadium            String
-  created_at         DateTime            @default(now())
-  updated_at         DateTime            @default(now())
-  current_manager_id String              @unique
-  league             League_Standings[]
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @default(now())
+  current_manager_id String               @unique
+  standing_snapshot  Standings_Snapshot[]
   managerContract    Manager_Contracts[]
   matchEvents        Match_Events[]
-  guestTeamMatch     Matches[]           @relation("GuestTeam")
-  hostTeamMatch      Matches[]           @relation("HostTeam")
+  guestTeamMatch     Matches[]            @relation("GuestTeam")
+  hostTeamMatch      Matches[]            @relation("HostTeam")
   playerContract     Player_Contracts[]
   player             Players[]
-  manager            Managers            @relation(fields: [current_manager_id], references: [id])
-  outgoingTransfers  Transfers[]         @relation("FromTeam")
-  incomingTransfers  Transfers[]         @relation("ToTeam")
+  manager            Managers             @relation(fields: [current_manager_id], references: [id])
+  outgoingTransfers  Transfers[]          @relation("FromTeam")
+  incomingTransfers  Transfers[]          @relation("ToTeam")
 }
 
 model Players {
@@ -207,17 +207,19 @@ model Manager_Contracts {
   @@index([manager_id, is_active])
 }
 
-model League_Standings {
+model Standings_Snapshot {
   team_id        String
   season         String
-  matches_played Int    @default(0)
-  wins           Int    @default(0)
-  draws          Int    @default(0)
-  losses         Int    @default(0)
-  goals_for      Int    @default(0)
-  goals_against  Int    @default(0)
-  points         Int    @default(0)
-  team           Teams  @relation(fields: [team_id], references: [id])
+  matches_played Int      @default(0)
+  wins           Int      @default(0)
+  draws          Int      @default(0)
+  losses         Int      @default(0)
+  goals_for      Int      @default(0)
+  goals_against  Int      @default(0)
+  points         Int      @default(0)
+  computed_at    DateTime @updatedAt
+  is_live        Boolean  @default(false)
+  team           Teams    @relation(fields: [team_id], references: [id])
 
   @@id([season, team_id])
 }
