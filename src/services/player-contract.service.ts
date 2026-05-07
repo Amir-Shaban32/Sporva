@@ -4,8 +4,7 @@ import {
   teamRepository,
 } from "../repositories";
 import { IPlayerContract, ICreatePlayerContract } from "../types";
-import { NotFoundError } from "../errors/app-error";
-import { BadRequestError } from "../errors/app-error";
+import { NotFoundError, UnprocessableEntityError } from "../errors/app-error";
 import { checkContractOverlap } from "../utils/contract-validation";
 
 export const createPlayerContractService = async (
@@ -31,6 +30,14 @@ export const createPlayerContractService = async (
   return contract;
 };
 
+export const getPlayerContractByIdService = async (
+  id: string,
+): Promise<IPlayerContract> => {
+  const contract = await playerContractRepository.findById(id);
+  if (!contract) throw new NotFoundError("Contract not found");
+  return contract;
+};
+
 export const getAllPlayerContractsService = async (
   page: number = 1,
   limit: number = 10,
@@ -38,7 +45,7 @@ export const getAllPlayerContractsService = async (
   const total = await playerContractRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
-    throw new BadRequestError(
+    throw new UnprocessableEntityError(
       `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
     );
   }

@@ -4,8 +4,7 @@ import {
   teamRepository,
 } from "../repositories";
 import { IManagerContract, ICreateManagerContract } from "../types";
-import { NotFoundError } from "../errors/app-error";
-import { BadRequestError } from "../errors/app-error";
+import { NotFoundError, UnprocessableEntityError } from "../errors/app-error";
 import { checkContractOverlap } from "../utils/contract-validation";
 
 export const createManagerContractService = async (
@@ -29,6 +28,14 @@ export const createManagerContractService = async (
   return contract;
 };
 
+export const getManagerContractByIdService = async (
+  id: string,
+): Promise<IManagerContract> => {
+  const contract = await managerContractRepository.findById(id);
+  if (!contract) throw new NotFoundError("Contract not found");
+  return contract;
+};
+
 export const getAllManagerContractsService = async (
   page: number = 1,
   limit: number = 10,
@@ -36,7 +43,7 @@ export const getAllManagerContractsService = async (
   const total = await managerContractRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
-    throw new BadRequestError(
+    throw new UnprocessableEntityError(
       `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
     );
   }
