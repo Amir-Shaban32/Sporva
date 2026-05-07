@@ -3,6 +3,7 @@ import { ManagerSearchInput, IManager, ICreateManager } from "../types";
 import { Prisma } from "../../generated/prisma";
 import { ConflictError, NotFoundError } from "../errors/app-error";
 import { BadRequestError } from "../errors/app-error";
+import { checkValidUpdateMember } from "../utils/check-update-member";
 
 export const createManagerService = async (
   data: ICreateManager,
@@ -70,6 +71,7 @@ export const updateManagerService = async (
   if (!existing) {
     throw new NotFoundError("Manager not found");
   }
+  checkValidUpdateMember(data, existing);
   const manager = await managerRepository.update(id, data);
 
   return manager;

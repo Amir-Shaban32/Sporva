@@ -8,6 +8,7 @@ import { Event_types } from "../../generated/prisma";
 import { NotFoundError } from "../errors/app-error";
 import { checkValidCreateMatchEvent } from "../utils/check-create-event";
 import { logger } from "../config";
+import { recomputeSnapshotService } from "./league-standing.service";
 
 export const createMatchEventService = async (
   data: ICreateMatchEvent,
@@ -26,6 +27,7 @@ export const createMatchEventService = async (
     data.event_type === "OWN_GOAL"
   ) {
     event = await matchEventRepository.createWithMatchUpdate(data, match);
+    await recomputeSnapshotService(match.season);
   } else {
     event = await matchEventRepository.create(data);
   }

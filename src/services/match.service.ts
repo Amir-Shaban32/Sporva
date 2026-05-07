@@ -1,5 +1,5 @@
-import { matchRepository, leagueStandingsRepository } from "../repositories";
-import { IMatch, ICreateMatch, MatchResult } from "../types";
+import { matchRepository } from "../repositories";
+import { IMatch, ICreateMatch } from "../types";
 import { Prisma, Match_status, Competitions } from "../../generated/prisma";
 import {
   ConflictError,
@@ -7,10 +7,9 @@ import {
   UnprocessableEntityError,
 } from "../errors/app-error";
 import { checkValidUpdateMatch } from "../utils/check-update-match";
-import { computeMatchDeltas } from "../utils/compute-match-deltas";
 import { checkValidRecordResult } from "../utils/check-valid-result";
-import { prisma } from "../lib/prisma";
 import { logger } from "../config";
+import { recomputeSnapshotService } from "./league-standing.service";
 
 export const scheduleMatchService = async (
   data: ICreateMatch,
@@ -36,6 +35,12 @@ export const scheduleMatchService = async (
   if (existing)
     throw new ConflictError("Match already scheduled for this season");
   const match = await matchRepository.schedule({ ...data, season });
+  return match;
+};
+
+export const getMatchByIdService = async (id: string): Promise<IMatch> => {
+  const match = await matchRepository.findById(id);
+  if (!match) throw new NotFoundError("match not found");
   return match;
 };
 
@@ -89,7 +94,22 @@ export const updateMatchService = async (
   }
   checkValidUpdateMatch(data, existing);
   const match = await matchRepository.update(id, data);
+
+  const isScoreUpdate =
+    data.host_team_score !== undefined || data.guest_team_score !== undefined;
+  const isLive = match.status === "LIVE";
+  if (isScoreUpdate && isLive) await recomputeSnapshotService(match.season);
   return match;
+};
+
+export const updateMatchStatusService = async (
+  id: string,
+  status: Match_status,
+) => {
+  const existing = await matchRepository.findById(id);
+  if (!existing) throw new NotFoundError("Match not found");
+  const match = await matchRepository.updateMatchStatus(id, status);
+  if (status === "LIVE") await recomputeSnapshotService(match.season);
 };
 
 export const recordMatchResultService = async (id: string): Promise<void> => {
@@ -100,29 +120,8 @@ export const recordMatchResultService = async (id: string): Promise<void> => {
     throw new UnprocessableEntityError("Match scores are not recorded");
   }
 
-  const [guest_result, host_result] = computeMatchDeltas(
-    match.guest_team_score,
-    match.host_team_score,
-  );
-
-  await prisma.$transaction(async (tx) => {
-    await matchRepository.updateStatus(match.id);
-
-    await Promise.all([
-      leagueStandingsRepository.updateAfterMatch(
-        match.guest_team_id,
-        match.season,
-        guest_result,
-        tx,
-      ),
-      leagueStandingsRepository.updateAfterMatch(
-        match.host_team_id,
-        match.season,
-        host_result,
-        tx,
-      ),
-    ]);
-  });
+  await matchRepository.updateStatus(id);
+  await recomputeSnapshotService(match.season);
 
   logger.info(
     {

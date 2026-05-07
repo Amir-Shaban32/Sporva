@@ -7,6 +7,7 @@ import {
   ConflictError,
   NotFoundError,
 } from "../errors/app-error";
+import { checkValidUpdateMember } from "../utils/check-update-member";
 
 export const createPlayerService = async (
   data: ICreatePlayer,
@@ -93,6 +94,7 @@ export const updatePlayerService = async (
   if (!existing) {
     throw new NotFoundError("Player not found");
   }
+  checkValidUpdateMember(data, existing);
   const player = await playerRepository.update(id, data);
 
   return player;

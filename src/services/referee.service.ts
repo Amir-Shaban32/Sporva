@@ -3,6 +3,7 @@ import { refereeRepository } from "../repositories";
 import { Prisma } from "../../generated/prisma";
 import { ConflictError, NotFoundError } from "../errors/app-error";
 import { BadRequestError } from "../errors/app-error";
+import { checkValidUpdateMember } from "../utils/check-update-member";
 
 export const createRefereeService = async (
   data: ICreateReferee,
@@ -71,6 +72,7 @@ export const updateRefereeService = async (
   if (!existing) {
     throw new NotFoundError("Referee not found");
   }
+  checkValidUpdateMember(data, existing);
   const referee = await refereeRepository.update(id, data);
 
   return referee;

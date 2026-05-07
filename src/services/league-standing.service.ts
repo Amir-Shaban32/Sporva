@@ -1,12 +1,15 @@
-import { leagueStandingsRepository } from "../repositories";
-import { ILeagueStanding } from "../types";
+import { standingsSnapshotRepository, matchRepository } from "../repositories";
+import { IStandingSnapshot } from "../types";
 import { handleSeason } from "../utils/handle-season";
+import { sortKeyToOrderBy } from "../utils/sort-standings";
+import { computeStandings } from "../utils/compute-standings";
 
 export const getLeagueTableService = async (
   season?: string,
-): Promise<ILeagueStanding[] | null> => {
+): Promise<IStandingSnapshot[] | null> => {
   const handledSeason = handleSeason(season);
-  const standings = await leagueStandingsRepository.tableOrder(handledSeason);
+  const standings =
+    await standingsSnapshotRepository.findBySeason(handledSeason);
 
   if (!standings || (Array.isArray(standings) && standings.length === 0))
     return null;
@@ -16,10 +19,12 @@ export const getLeagueTableService = async (
 
 export const getLeagueTableByMostWinsService = async (
   season?: string,
-): Promise<ILeagueStanding[] | null> => {
+): Promise<IStandingSnapshot[] | null> => {
   const handledSeason = handleSeason(season);
-  const standings =
-    await leagueStandingsRepository.tableOrderByMostWins(handledSeason);
+  const standings = await standingsSnapshotRepository.findBySeasonOnOrderBy(
+    handledSeason,
+    sortKeyToOrderBy("wins"),
+  );
 
   if (!standings || (Array.isArray(standings) && standings.length === 0))
     return null;
@@ -29,10 +34,12 @@ export const getLeagueTableByMostWinsService = async (
 
 export const getLeagueTableByMostDrawsService = async (
   season?: string,
-): Promise<ILeagueStanding[] | null> => {
+): Promise<IStandingSnapshot[] | null> => {
   const handledSeason = handleSeason(season);
-  const standings =
-    await leagueStandingsRepository.tableOrderByMostDraws(handledSeason);
+  const standings = await standingsSnapshotRepository.findBySeasonOnOrderBy(
+    handledSeason,
+    sortKeyToOrderBy("draws"),
+  );
 
   if (!standings || (Array.isArray(standings) && standings.length === 0))
     return null;
@@ -42,10 +49,12 @@ export const getLeagueTableByMostDrawsService = async (
 
 export const getLeagueTableByLeastLossesService = async (
   season?: string,
-): Promise<ILeagueStanding[] | null> => {
+): Promise<IStandingSnapshot[] | null> => {
   const handledSeason = handleSeason(season);
-  const standings =
-    await leagueStandingsRepository.tableOrderByLeastLoses(handledSeason);
+  const standings = await standingsSnapshotRepository.findBySeasonOnOrderBy(
+    handledSeason,
+    sortKeyToOrderBy("losses"),
+  );
 
   if (!standings || (Array.isArray(standings) && standings.length === 0))
     return null;
@@ -55,10 +64,12 @@ export const getLeagueTableByLeastLossesService = async (
 
 export const getLeagueTableByMostGoalsForService = async (
   season?: string,
-): Promise<ILeagueStanding[] | null> => {
+): Promise<IStandingSnapshot[] | null> => {
   const handledSeason = handleSeason(season);
-  const standings =
-    await leagueStandingsRepository.tableOrderByMostGoalsFor(handledSeason);
+  const standings = await standingsSnapshotRepository.findBySeasonOnOrderBy(
+    handledSeason,
+    sortKeyToOrderBy("goals_for"),
+  );
 
   if (!standings || (Array.isArray(standings) && standings.length === 0))
     return null;
@@ -68,12 +79,12 @@ export const getLeagueTableByMostGoalsForService = async (
 
 export const getLeagueTableByLeastGoalsAgainstService = async (
   season?: string,
-): Promise<ILeagueStanding[] | null> => {
+): Promise<IStandingSnapshot[] | null> => {
   const handledSeason = handleSeason(season);
-  const standings =
-    await leagueStandingsRepository.tableOrderByLeastGoalsAgainst(
-      handledSeason,
-    );
+  const standings = await standingsSnapshotRepository.findBySeasonOnOrderBy(
+    handledSeason,
+    sortKeyToOrderBy("goals_against"),
+  );
 
   if (!standings || (Array.isArray(standings) && standings.length === 0))
     return null;
@@ -83,13 +94,30 @@ export const getLeagueTableByLeastGoalsAgainstService = async (
 
 export const getLeagueTableByGoalsDifferenceService = async (
   season?: string,
-): Promise<ILeagueStanding[] | null> => {
+): Promise<IStandingSnapshot[] | null> => {
   const handledSeason = handleSeason(season);
   const standings =
-    await leagueStandingsRepository.tableOrderByGoalsDifference(handledSeason);
+    await standingsSnapshotRepository.findBySeasonOrderByGoalDifference(
+      handledSeason,
+    );
 
   if (!standings || (Array.isArray(standings) && standings.length === 0))
     return null;
 
   return standings;
+};
+
+export const recomputeSnapshotService = async (
+  season: string,
+): Promise<void> => {
+  const finishedMatches = await matchRepository.findBySeasonAndStatus(
+    season,
+    "FINISHED",
+  );
+  const liveMatches = await matchRepository.findBySeasonAndStatus(
+    season,
+    "LIVE",
+  );
+  const records = computeStandings(finishedMatches, liveMatches);
+  await standingsSnapshotRepository.upsertMany(records);
 };
