@@ -1,5 +1,4 @@
 export * from "./team.type";
-export * from "./league-standing.type";
 export * from "./manager.type";
 export * from "./manager-contract.type";
 export * from "./match.type";
@@ -12,3 +11,4 @@ export * from "./transfer.type";
 export * from "./user.type";
 export * from "./refresh-token.type";
 export * from "./auth.type";
+export * from "./standings-snapshot.type";
