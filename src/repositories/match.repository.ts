@@ -50,6 +50,12 @@ class MatchRepository {
     });
   }
 
+  async findBySeasonAndStatus(season: string, status: Match_status) {
+    return await prisma.matches.findMany({
+      where: { status, season },
+    });
+  }
+
   async findByComp(competition: Competitions) {
     return await prisma.matches.findMany({
       where: { competition },
@@ -113,6 +119,16 @@ class MatchRepository {
     return await tx.matches.update({
       where: { id },
       data: { status: "FINISHED" },
+    });
+  }
+
+  async updateMatchStatus(id: string, status: Match_status) {
+    return await prisma.matches.update({
+      where: { id },
+      data: {
+        status,
+        ...(status === "LIVE" && { host_team_score: 0, guest_team_score: 0 }),
+      },
     });
   }
 }

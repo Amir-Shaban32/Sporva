@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma";
 import { Event_types } from "../../generated/prisma";
 import { ICreateMatchEvent, IMatch } from "../types";
+import { logger } from "../config";
 
 class MatchEventRepository {
   async create(data: ICreateMatchEvent) {
@@ -16,11 +17,33 @@ class MatchEventRepository {
   }
 
   async createWithMatchUpdate(data: ICreateMatchEvent, match: IMatch) {
-    return await prisma.$transaction(async (prisma) => {
-      const event = await prisma.match_Events.create({ data });
+    return await prisma.$transaction(async (tx) => {
+      const event = await tx.match_Events.create({
+        data: {
+          match_id: data.match_id,
+          player_id: data.player_id,
+          team_id: data.team_id,
+          event_type: data.event_type,
+          minute: data.minute,
+        },
+      });
+
+      logger.info(
+        {
+          event_type: data.event_type,
+          team_id: data.team_id,
+          host_team_id: match.host_team_id,
+          guest_team_id: match.guest_team_id,
+          host_score: match.host_team_score,
+          guest_score: match.guest_team_score,
+          is_host: data.team_id === match.host_team_id,
+          is_guest: data.team_id === match.guest_team_id,
+        },
+        "Transaction debug",
+      );
 
       if (data.event_type === "GOAL" || data.event_type === "SCORE_PENALTY") {
-        await prisma.matches.update({
+        await tx.matches.update({
           where: { id: data.match_id },
           data: {
             host_team_score:
@@ -36,7 +59,7 @@ class MatchEventRepository {
       }
 
       if (data.event_type === "OWN_GOAL") {
-        await prisma.matches.update({
+        await tx.matches.update({
           where: { id: data.match_id },
           data: {
             host_team_score:
