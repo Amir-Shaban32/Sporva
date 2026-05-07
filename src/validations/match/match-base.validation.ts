@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Competitions } from "generated/prisma";
+import { dateSchema } from "../date.schema";
 
 export const matchBase = z.strictObject({
   season: z
@@ -19,12 +20,9 @@ export const matchBase = z.strictObject({
   stadium: z.string().min(3),
   host_team_id: z.cuid(),
   guest_team_id: z.cuid(),
-  match_time: z.coerce.date(),
-  competition: z.enum([
-    Competitions.LEAGUE,
-    Competitions.CUP,
-    Competitions.SUPER,
-    Competitions.CAF,
-  ]),
+  match_time: dateSchema,
+  competition: z.enum(
+    Object.values(Competitions) as unknown as [Competitions, ...Competitions[]],
+  ),
   got_extra_time: z.boolean().optional(),
 });

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Positions, Match_status, Competitions } from "generated/prisma";
+import { dateSchema } from "./date.schema";
 
 export const paginationValidation = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -32,7 +33,7 @@ export const cityValidation = z.object({
 });
 
 export const nationalityValidation = z.object({
-  city: z.string().min(2, "Nationality is required"),
+  nationality: z.string().min(2, "Nationality is required"),
 });
 
 export const intervalValidation = z.object({
@@ -64,7 +65,7 @@ export const competitionValidation = z.object({
 });
 
 export const dateValidation = z.object({
-  date: z.coerce.date(),
+  date: dateSchema,
 });
 
 export const seasonValidation = z.object({

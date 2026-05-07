@@ -1,12 +1,13 @@
 // transfer.validation.ts
 import { z } from "zod";
 import { Transfer_type } from "../../generated/prisma";
+import { dateSchema } from "./date.schema";
 
 const transferBase = z.strictObject({
   player_id: z.cuid(),
   from_team_id: z.cuid(),
   to_team_id: z.cuid(),
-  transfer_date: z.coerce.date().optional(),
+  transfer_date: dateSchema.optional(),
 });
 
 export const createTransferValidation = transferBase.and(
