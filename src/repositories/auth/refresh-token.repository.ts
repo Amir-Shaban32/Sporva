@@ -1,6 +1,8 @@
-import { InputJsonValue } from "generated/prisma/runtime/client";
+import { InputJsonValue } from "../../../generated/prisma/runtime/client";
 import { prisma } from "../../lib/prisma";
 import { ICreateRefreshToken } from "../../types";
+import { NotFoundError } from "../../errors/app-error";
+import { isPrismaError } from "../../utils/check-prisma-error";
 
 class RefreshTokenRepository {
   async createToken(data: ICreateRefreshToken) {
@@ -42,8 +44,16 @@ class RefreshTokenRepository {
       data: { is_revoked: true },
     });
   }
+
   async delete(id: string) {
-    return await prisma.refresh_Tokens.delete({ where: { id } });
+    try {
+      return await prisma.refresh_Tokens.delete({ where: { id } });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Token not found");
+      }
+      throw error;
+    }
   }
 }
 

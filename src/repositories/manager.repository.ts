@@ -1,6 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { Prisma } from "../../generated/prisma";
 import { ICreateManager, ManagerSearchInput } from "../types";
+import { NotFoundError } from "../errors/app-error";
+import { isPrismaError } from "../utils/check-prisma-error";
 
 export class ManagerRepository {
   async create(data: ICreateManager) {
@@ -59,9 +61,16 @@ export class ManagerRepository {
   }
 
   async delete(id: string) {
-    return await prisma.managers.delete({
-      where: { id },
-    });
+    try {
+      return await prisma.managers.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Manager not found");
+      }
+      throw error;
+    }
   }
 
   async count() {

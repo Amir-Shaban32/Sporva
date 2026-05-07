@@ -1,6 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { Prisma } from "../../generated/prisma";
 import { ICreateReferee, RefereeSearchInput } from "../types";
+import { NotFoundError } from "../errors/app-error";
+import { isPrismaError } from "../utils/check-prisma-error";
 
 class RefereeRepository {
   async create(data: ICreateReferee) {
@@ -52,16 +54,30 @@ class RefereeRepository {
   }
 
   async update(id: string, data: Prisma.UserUpdateInput) {
-    return await prisma.referees.update({
-      where: { id },
-      data,
-    });
+    try {
+      return await prisma.referees.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Referee not found");
+      }
+      throw error;
+    }
   }
 
   async delete(id: string) {
-    return await prisma.referees.delete({
-      where: { id },
-    });
+    try {
+      return await prisma.referees.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Referee not found");
+      }
+      throw error;
+    }
   }
 
   async count() {

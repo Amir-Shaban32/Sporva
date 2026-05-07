@@ -1,5 +1,7 @@
 import { prisma } from "../lib/prisma";
 import { ICreateMatchReferee } from "../types";
+import { NotFoundError } from "../errors/app-error";
+import { isPrismaError } from "../utils/check-prisma-error";
 
 class MatchRefereeRepository {
   async assign(data: ICreateMatchReferee) {
@@ -31,15 +33,22 @@ class MatchRefereeRepository {
   }
 
   async unAssign(composite_id: ICreateMatchReferee) {
-    return await prisma.match_Referees.delete({
-      where: {
-        match_id_referee_id_role: {
-          referee_id: composite_id.referee_id,
-          match_id: composite_id.match_id,
-          role: composite_id.role,
+    try {
+      return await prisma.match_Referees.delete({
+        where: {
+          match_id_referee_id_role: {
+            referee_id: composite_id.referee_id,
+            match_id: composite_id.match_id,
+            role: composite_id.role,
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Match Referee record not found");
+      }
+      throw error;
+    }
   }
 }
 

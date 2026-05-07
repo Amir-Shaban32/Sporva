@@ -1,6 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { Prisma, Positions } from "../../generated/prisma";
 import { ICreatePlayer, PlayerSearchInput } from "../types";
+import { NotFoundError } from "../errors/app-error";
+import { isPrismaError } from "../utils/check-prisma-error";
 
 class PlayerRepository {
   async create(data: ICreatePlayer) {
@@ -66,16 +68,30 @@ class PlayerRepository {
   }
 
   async update(id: string, data: Prisma.PlayersUpdateInput) {
-    return await prisma.players.update({
-      where: { id },
-      data,
-    });
+    try {
+      return await prisma.players.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Player not found");
+      }
+      throw error;
+    }
   }
 
   async delete(id: string) {
-    return await prisma.players.delete({
-      where: { id },
-    });
+    try {
+      return await prisma.players.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Player not found");
+      }
+      throw error;
+    }
   }
 
   async count() {

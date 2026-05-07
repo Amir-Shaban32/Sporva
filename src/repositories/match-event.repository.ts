@@ -1,7 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { Event_types } from "../../generated/prisma";
 import { ICreateMatchEvent, IMatch } from "../types";
-import { logger } from "../config";
+import { NotFoundError } from "../errors/app-error";
+import { isPrismaError } from "../utils/check-prisma-error";
 
 class MatchEventRepository {
   async create(data: ICreateMatchEvent) {
@@ -27,20 +28,6 @@ class MatchEventRepository {
           minute: data.minute,
         },
       });
-
-      logger.info(
-        {
-          event_type: data.event_type,
-          team_id: data.team_id,
-          host_team_id: match.host_team_id,
-          guest_team_id: match.guest_team_id,
-          host_score: match.host_team_score,
-          guest_score: match.guest_team_score,
-          is_host: data.team_id === match.host_team_id,
-          is_guest: data.team_id === match.guest_team_id,
-        },
-        "Transaction debug",
-      );
 
       if (data.event_type === "GOAL" || data.event_type === "SCORE_PENALTY") {
         await tx.matches.update({
@@ -95,7 +82,14 @@ class MatchEventRepository {
   }
 
   async delete(id: string) {
-    return await prisma.match_Events.delete({ where: { id } });
+    try {
+      return await prisma.match_Events.delete({ where: { id } });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Event not found");
+      }
+      throw error;
+    }
   }
 }
 

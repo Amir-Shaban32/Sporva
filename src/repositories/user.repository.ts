@@ -1,6 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { Prisma, User_Role } from "../../generated/prisma";
 import { ICreateUser } from "../types";
+import { NotFoundError } from "../errors/app-error";
+import { isPrismaError } from "../utils/check-prisma-error";
 
 class UserRepository {
   async create(data: ICreateUser) {
@@ -100,32 +102,38 @@ class UserRepository {
   }
 
   async update(id: string, data: Prisma.UserUpdateInput) {
-    return await prisma.user.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        role: true,
-        created_at: true,
-        updated_at: true,
-      },
-    });
+    try {
+      return await prisma.user.update({
+        where: { id },
+        data,
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          role: true,
+          created_at: true,
+          updated_at: true,
+        },
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("User not found");
+      }
+      throw error;
+    }
   }
 
   async delete(id: string) {
-    return await prisma.user.delete({
-      where: { id },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        role: true,
-        created_at: true,
-        updated_at: true,
-      },
-    });
+    try {
+      return await prisma.user.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("User not found");
+      }
+      throw error;
+    }
   }
 
   async count() {

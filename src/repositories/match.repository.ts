@@ -1,6 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { Competitions, Match_status, Prisma } from "../../generated/prisma";
 import { ICreateMatch } from "../types";
+import { isPrismaError } from "../utils/check-prisma-error";
+import { NotFoundError } from "../errors/app-error";
 
 class MatchRepository {
   async schedule(data: ICreateMatch) {
@@ -109,27 +111,48 @@ class MatchRepository {
   }
 
   async update(id: string, data: Prisma.UserUpdateInput) {
-    return await prisma.matches.update({
-      where: { id },
-      data: data,
-    });
+    try {
+      return await prisma.matches.update({
+        where: { id },
+        data: data,
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Match not found");
+      }
+      throw error;
+    }
   }
 
   async updateStatus(id: string, tx: Prisma.TransactionClient = prisma) {
-    return await tx.matches.update({
-      where: { id },
-      data: { status: "FINISHED" },
-    });
+    try {
+      return await tx.matches.update({
+        where: { id },
+        data: { status: "FINISHED" },
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Match not found");
+      }
+      throw error;
+    }
   }
 
   async updateMatchStatus(id: string, status: Match_status) {
-    return await prisma.matches.update({
-      where: { id },
-      data: {
-        status,
-        ...(status === "LIVE" && { host_team_score: 0, guest_team_score: 0 }),
-      },
-    });
+    try {
+      return await prisma.matches.update({
+        where: { id },
+        data: {
+          status,
+          ...(status === "LIVE" && { host_team_score: 0, guest_team_score: 0 }),
+        },
+      });
+    } catch (error) {
+      if (isPrismaError(error) && error.code === "P2025") {
+        throw new NotFoundError("Match not found");
+      }
+      throw error;
+    }
   }
 }
 
