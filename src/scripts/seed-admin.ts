@@ -1,6 +1,6 @@
-import { userRepository } from "../repositories";
-import { hashPassword } from "../utils/password";
-import { logger, env } from "../config";
+import { userRepository } from "@domains/user/user.repository";
+import { hashPassword } from "@shared/utils/password";
+import { logger, env } from "@shared/config";
 
 const seedAdmin = async () => {
   const existing = await userRepository.findAdmin();

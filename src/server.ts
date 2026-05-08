@@ -1,8 +1,7 @@
-import "./config/env.config";
+import "@shared/config/env.config";
 import app from "./app";
-import { logger } from "./config";
-import { env } from "./config";
-import { prisma } from "./lib/prisma";
+import { logger, env } from "@shared/config";
+import { prisma } from "@shared/lib/prisma";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 

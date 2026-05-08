@@ -1,15 +1,15 @@
 import express, { Application } from "express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
-import { responseMiddleware } from "./middleware/response.middleware";
-import { errorHandler } from "./middleware/error-handler.middleware";
-import { notFoundHandler } from "./middleware/error-handler.middleware";
-import httpLogger from "./middleware/request-log.middleware";
-import { requestId } from "./middleware/request-id";
-import { corsConfig } from "./config/cors.config";
-import v1Router from "./routes/v1";
-import healthRouter from "./routes/health.route";
-import authRouter from "./routes/auth/auth.route";
+import { responseMiddleware } from "@shared/middleware/response.middleware";
+import { errorHandler } from "@shared/middleware/error-handler.middleware";
+import { notFoundHandler } from "@shared/middleware/error-handler.middleware";
+import httpLogger from "@shared/middleware/request-log.middleware";
+import { requestId } from "@shared/middleware/request-id";
+import { corsConfig } from "@shared/config";
+import v1Router from "@shared/routes/v1";
+import healthRouter from "@shared/health/health.routes";
+import authRouter from "@domains/auth/auth.routes";
 
 const app: Application = express();
 
