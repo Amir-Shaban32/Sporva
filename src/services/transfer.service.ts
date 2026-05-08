@@ -1,14 +1,6 @@
-import {
-  playerRepository,
-  transferRepository,
-  teamRepository,
-} from "../repositories";
+import { playerRepository, transferRepository } from "../repositories";
 import { ITransfer, ICreateTransfer } from "../types";
-import {
-  BadRequestError,
-  NotFoundError,
-  UnprocessableEntityError,
-} from "../errors/app-error";
+import { NotFoundError, UnprocessableEntityError } from "../errors/app-error";
 
 export const createTransferService = async (
   data: ICreateTransfer,
@@ -17,34 +9,20 @@ export const createTransferService = async (
   if (!existingPlayer) {
     throw new NotFoundError("Player not found");
   }
-
-  const fromTeam = await teamRepository.findById(data.from_team_id);
-  if (!fromTeam) {
-    throw new NotFoundError("From team not found");
-  }
-
-  const toTeam = await teamRepository.findById(data.to_team_id);
-  if (!toTeam) {
-    throw new NotFoundError("To team not found");
-  }
-
   if (existingPlayer.team_id !== data.from_team_id) {
     throw new UnprocessableEntityError(
       "Player does not belong to the from team",
     );
   }
-
   if (existingPlayer.team_id === data.to_team_id) {
     throw new UnprocessableEntityError("Player already belongs to the to team");
   }
 
-  await playerRepository.update(data.player_id, {
-    team: {
-      connect: { id: data.to_team_id },
-    },
-  });
+  const transfer = await transferRepository.createWithPlayerUpdate(
+    data,
+    existingPlayer,
+  );
 
-  const transfer = await transferRepository.create(data);
   return transfer;
 };
 
@@ -64,7 +42,7 @@ export const getAllTransService = async (
   const total = await transferRepository.count();
 
   if (total > 0 && page > Math.ceil(total / limit)) {
-    throw new BadRequestError(
+    throw new UnprocessableEntityError(
       `Page ${page} does not exist. Total pages: ${Math.ceil(total / limit)}`,
     );
   }
