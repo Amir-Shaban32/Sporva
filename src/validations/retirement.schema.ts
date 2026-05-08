@@ -5,7 +5,7 @@ export const retirementSchema = z.discriminatedUnion("is_retired", [
   z.object({
     is_retired: z.literal(false),
     retired_date: z
-      .null({ message: "retired_date must be null when player is not retired" })
+      .null({ message: "retired_date must be null when is_retired is false" })
       .optional(),
   }),
   z.object({

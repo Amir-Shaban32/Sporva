@@ -11,4 +11,3 @@ export { matchEventRepository } from "./match-event.repository";
 export { matchRefereeRepository } from "./match-referee.repository";
 export { refreshTokenRepository } from "./auth/refresh-token.repository";
 export { standingsSnapshotRepository } from "./standings-snapshot.repository";
-export { health } from "./health.repository";
