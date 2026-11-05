@@ -10,6 +10,8 @@ import { corsConfig } from "@shared/config";
 import v1Router from "@shared/routes/v1";
 import healthRouter from "@shared/health/health.routes";
 import authRouter from "@domains/auth/auth.routes";
+import swaggerUi from "swagger-ui-express";
+import openApi from "./swagger";
 
 const app: Application = express();
 
@@ -31,6 +33,10 @@ app.use(cookieParser());
 app.use("/health", healthRouter);
 app.use("/api/v1", v1Router);
 app.use("/auth", authRouter);
+
+// Swagger UI
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApi));
+app.get("/docs.json", (_req, res) => res.json(openApi));
 
 app.use(notFoundHandler);
 app.use(errorHandler);

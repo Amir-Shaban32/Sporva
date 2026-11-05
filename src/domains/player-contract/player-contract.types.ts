@@ -1,3 +1,5 @@
+import { Prisma } from "@generated/prisma";
+
 export interface ICreatePlayerContract {
   player_id: string;
   team_id: string;
@@ -13,7 +15,7 @@ export interface IPlayerContract {
   team_id: string;
   start_date: Date;
   end_date: Date;
-  annual_salary: number;
+  annual_salary: Prisma.Decimal;
   is_active: boolean;
   created_at: Date;
 }

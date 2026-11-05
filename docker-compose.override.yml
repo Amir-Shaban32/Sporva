@@ -1,0 +1,13 @@
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  api:
+    build:
+      target: development
+    image: sporva-api:dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./src:/app/src
