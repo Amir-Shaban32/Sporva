@@ -20,10 +20,13 @@ export const prismaErrorHandler = (
       return new ConflictError("Duplicate entry — unique constraint failed");
     case "P2025":
       return new NotFoundError("Record not found");
-    case "P2003":
-      return new BadRequestError("Foreign key constraint failed", {
-        field: err.meta.field_name,
-      });
+    case "P2003": {
+      const fieldName = err.meta?.field_name;
+      return new BadRequestError(
+        "Foreign key constraint failed",
+        typeof fieldName === "string" ? { field: [fieldName] } : undefined,
+      );
+    }
     default:
       return new ServerError("Database operation failed");
   }
