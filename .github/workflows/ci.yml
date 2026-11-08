@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
+      - name: Build
+        run: pnpm build
+
+  docker-smoke:
+    name: docker-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build production image
+        run: >-
+          docker buildx build
+          --target production
+          --tag sporva-api:ci
+          --cache-from type=gha,scope=sporva-production
+          --cache-to type=gha,scope=sporva-production,mode=max
+          --load
+          .
+
+      - name: Create CI environment
+        run: |
+          cp .env.example .env
+          cat >> .env <<'EOF'
+          NODE_ENV=production
+          DATABASE_URL=postgresql://sporva_ci:SporvaCI_12345@postgres:5432/sporva_ci
+          ACCESS_SECRET_KEY=ci-only-access-secret-key-not-for-production
+          REFRESH_SECRET_KEY=ci-only-refresh-secret-key-not-for-production
+          BETTER_STACK_TOKEN=ci-only-dummy-token
+          POSTGRES_USER=sporva_ci
+          POSTGRES_PASSWORD=SporvaCI_12345
+          POSTGRES_DB=sporva_ci
+          API_PORT=3000
+          EOF
+
+      - name: Start Compose and wait for health
+        run: |
+          SPORVA_API_IMAGE=sporva-api:ci docker compose -f docker-compose.yml up -d
+
+          api_port="$(sed -n 's/^API_PORT=//p' .env | tail -n 1)"
+          health_url="http://127.0.0.1:${api_port}/health"
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent "$health_url"; then
+              printf '\nHealth check passed.\n'
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "API did not become healthy within 120 seconds."
+          curl --fail --show-error "$health_url"
+
+      - name: Dump Compose logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.yml logs --no-color
+
+      - name: Tear down Compose
+        if: always()
+        run: docker compose -f docker-compose.yml down --volumes --remove-orphans
